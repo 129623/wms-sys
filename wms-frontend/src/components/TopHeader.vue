@@ -2,15 +2,35 @@
 import { ref } from 'vue';
 import { Search, Bell, Mail, User, LogOut, Settings, ChevronDown } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
+import { showToast } from '../utils/toast';
 
 const router = useRouter();
 const showUserMenu = ref(false);
+const searchQuery = ref('');
 
-// 获取用户名（从localStorage）
-const username = localStorage.getItem('username') || '管理员';
+// 获取用户信息（从localStorage）
+const username = localStorage.getItem('username') || '用户';
+const role = localStorage.getItem('role') || '用户';
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
+};
+
+const handleSearch = () => {
+  const query = searchQuery.value.trim();
+  if (!query) {
+    showToast('请输入搜索内容', 'warning');
+    return;
+  }
+  
+  // 导航到搜索结果页面，带上查询参数
+  router.push({
+    path: '/search',
+    query: { q: query }
+  });
+  
+  // 清空搜索框
+  searchQuery.value = '';
 };
 
 const handleLogout = () => {
@@ -19,6 +39,9 @@ const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
+    localStorage.removeItem('role');
+    localStorage.removeItem('account');
+    localStorage.removeItem('roles');
     localStorage.removeItem('isLoggedIn');  // 重要：清除登录状态
     
     // 强制刷新并跳转到登录页
@@ -42,7 +65,13 @@ const closeMenu = () => {
     <div class="header-actions">
       <div class="search-wrapper">
         <Search :size="18" class="search-icon" />
-        <input type="text" placeholder="搜索订单、货物..." class="search-input" />
+        <input 
+          type="text" 
+          v-model="searchQuery"
+          placeholder="搜索订单、货物..." 
+          class="search-input"
+          @keyup.enter="handleSearch"
+        />
       </div>
 
       <div class="icon-btn">
@@ -54,7 +83,7 @@ const closeMenu = () => {
 
       <div class="user-profile" @click="toggleUserMenu">
         <div class="avatar">
-          {{ username.substring(0, 2).toUpperCase() }}
+          {{ username ? username.substring(0, 1).toUpperCase() : 'U' }}
         </div>
         <ChevronDown :size="16" class="chevron" :class="{ rotated: showUserMenu }" />
         
@@ -62,21 +91,17 @@ const closeMenu = () => {
         <div v-if="showUserMenu" class="user-dropdown" @click.stop>
           <div class="dropdown-header">
             <div class="user-avatar-large">
-              {{ username.substring(0, 2).toUpperCase() }}
+              {{ username ? username.substring(0, 1).toUpperCase() : 'U' }}
             </div>
             <div class="user-info">
               <div class="user-name">{{ username }}</div>
-              <div class="user-role">管理员</div>
+              <div class="user-role">{{ role }}</div>
             </div>
           </div>
           
           <div class="dropdown-divider"></div>
           
           <div class="dropdown-items">
-            <div class="dropdown-item" @click="router.push('/system')">
-              <Settings :size="18" />
-              <span>系统设置</span>
-            </div>
             <div class="dropdown-item logout" @click="handleLogout">
               <LogOut :size="18" />
               <span>退出登录</span>

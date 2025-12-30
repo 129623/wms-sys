@@ -113,6 +113,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/search',
+    name: 'SearchResults',
+    component: () => import('../views/SearchResults.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/system/user',
     name: 'UserManagement',
     component: () => import('../views/system/UserManagement.vue'),
@@ -122,6 +128,18 @@ const routes = [
     path: '/system/role',
     name: 'RoleManagement',
     component: () => import('../views/system/RoleManagement.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/storage-type',
+    name: 'StorageTypeManagement',
+    component: () => import('../views/StorageTypeManagement.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/product-label',
+    name: 'ProductLabelManagement',
+    component: () => import('../views/ProductLabelManagement.vue'),
     meta: { requiresAuth: true }
   }
 ];

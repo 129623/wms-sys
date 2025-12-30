@@ -9,7 +9,6 @@ import {
   Settings, 
   Box, 
   Users,
-  Activity,
   ChevronDown,
   ChevronRight,
   Warehouse
@@ -29,6 +28,8 @@ const basicDataItems = [
   { name: '货物资料', path: '/cargo', icon: Box },
   { name: '分类管理', path: '/category', icon: Database },
   { name: '单位资料', path: '/unit', icon: Database },
+  { name: '存储类型', path: '/storage-type', icon: Database },
+  { name: '货物标签', path: '/product-label', icon: Database },
   { name: '客户/供应商', path: '/customer', icon: Users },
 ];
 
@@ -145,12 +146,6 @@ const isWarehouseGroupActive = () => {
       </div>
     </nav>
 
-    <div class="sidebar-footer">
-      <button class="status-btn">
-        <Activity :size="20" />
-        <span>系统状态</span>
-      </button>
-    </div>
   </aside>
 </template>
 

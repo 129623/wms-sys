@@ -57,9 +57,14 @@ const createContainer = () => {
 
 // Add pointer-events auto to the toast wrapper in css so interactions work.
 
+export const showToast = (message, type = 'info', duration = 3000) => {
+    show(message, type, duration);
+};
+
 export default {
     success: (msg, duration) => show(msg, 'success', duration),
     error: (msg, duration) => show(msg, 'error', duration),
     warning: (msg, duration) => show(msg, 'warning', duration),
-    info: (msg, duration) => show(msg, 'info', duration)
+    info: (msg, duration) => show(msg, 'info', duration),
+    show: showToast  // Also add it to default export
 };

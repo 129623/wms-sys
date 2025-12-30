@@ -20,7 +20,8 @@ const showBatchModal = ref(false); // Batch Add Modal
 const submitting = ref(false);
 const form = reactive({
   locationId: null, warehouseId: null, zoneId: null, rackId: null,
-  locationCode: '', rowNo: null, layerNo: null, status: 1
+  locationCode: '', rowNo: null, layerNo: null, status: 1,
+  maxWeight: 0.00, maxVolume: 0.00
 });
 
 const batchForm = reactive({
@@ -67,7 +68,11 @@ watch(() => batchForm.warehouseId, (val) => updateZones(val, filteredZones)); //
 
 const openAdd = () => {
     isEdit.value = false;
-    Object.assign(form, { locationId: null, warehouseId: null, zoneId: null, rackId: null, locationCode: '', rowNo: 1, layerNo: 1, status: 1 });
+    Object.assign(form, { 
+        locationId: null, warehouseId: null, zoneId: null, rackId: null, 
+        locationCode: '', rowNo: 1, layerNo: 1, status: 1,
+        maxWeight: 0.00, maxVolume: 0.00
+    });
     showModal.value = true;
 }
 const openBatchAdd = () => {
@@ -173,6 +178,16 @@ onMounted(() => { fetchMeta(); fetchData(); });
                  <div class="form-group">
                     <label>层号</label>
                     <input v-model.number="form.layerNo" type="number" class="form-input" />
+                 </div>
+             </div>
+             <div class="two-col">
+                 <div class="form-group">
+                    <label>最大重量 (kg)</label>
+                    <input v-model.number="form.maxWeight" type="number" step="0.01" class="form-input" placeholder="0.00" />
+                 </div>
+                 <div class="form-group">
+                    <label>最大体积 (m³)</label>
+                    <input v-model.number="form.maxVolume" type="number" step="0.01" class="form-input" placeholder="0.00" />
                  </div>
              </div>
           </div>

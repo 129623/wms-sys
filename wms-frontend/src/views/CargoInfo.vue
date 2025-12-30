@@ -15,10 +15,14 @@ const queryParams = reactive({
 // Cache for dropdowns and mapping
 const categories = ref([]);
 const units = ref([]);
+const storageTypes = ref([]);
+const productLabels = ref([]);
 
 // Mapping Helpers
 const getCategoryName = (id) => categories.value.find(c => c.categoryId === id)?.categoryName || '-';
 const getUnitName = (id) => units.value.find(u => u.unitId === id)?.unitName || '-';
+const getStorageTypeName = (id) => storageTypes.value.find(t => t.storageTypeId === id)?.typeName || '-';
+const getLabelName = (id) => productLabels.value.find(l => l.labelId === id)?.labelName || '-';
 
 // Modal State
 const showModal = ref(false);
@@ -32,6 +36,11 @@ const form = reactive({
   unitId: '',
   spec: '',
   weight: 0,
+  length: 0,
+  width: 0,
+  height: 0,
+  storageTypeId: '',
+  labelId: '',
   origin: ''
 });
 
@@ -52,12 +61,16 @@ const fetchData = async () => {
 
 const fetchMeta = async () => {
   try {
-    const [resCat, resUnit] = await Promise.all([
+    const [resCat, resUnit, resType, resLabel] = await Promise.all([
       request.get('/category/list'),
-      request.get('/unit/list')
+      request.get('/unit/list'),
+      request.get('/storage-type/page'),
+      request.get('/product-label/page')
     ]);
     if (resCat.code === 200) categories.value = resCat.data;
     if (resUnit.code === 200) units.value = resUnit.data;
+    if (resType.code === 200) storageTypes.value = resType.data.records || resType.data;
+    if (resLabel.code === 200) productLabels.value = resLabel.data.records || resLabel.data;
   } catch (e) {
     console.error("Meta fetch failed", e);
   }
@@ -83,6 +96,11 @@ const openAddModal = () => {
     unitId: '',
     spec: '',
     weight: 0,
+    length: 0,
+    width: 0,
+    height: 0,
+    storageTypeId: '',
+    labelId: '',
     origin: ''
   });
   showModal.value = true;
@@ -109,7 +127,43 @@ const handleDelete = async (id) => {
 };
 
 const submitForm = async () => {
-  if (!form.productName) return alert('请输入产品名称');
+  // 验证所有必填字段
+  if (!form.productName || form.productName.trim() === '') {
+    return alert('请输入产品名称');
+  }
+  if (!form.skuCode || form.skuCode.trim() === '') {
+    return alert('请输入SKU编码');
+  }
+  if (!form.categoryId) {
+    return alert('请选择分类');
+  }
+  if (!form.unitId) {
+    return alert('请选择单位');
+  }
+  if (!form.spec || form.spec.trim() === '') {
+    return alert('请输入规格型号');
+  }
+  if (!form.storageTypeId) {
+    return alert('请选择存储类型');
+  }
+  if (!form.labelId) {
+    return alert('请选择货物标签');
+  }
+  if (!form.weight || form.weight <= 0) {
+    return alert('请输入有效的重量（大于0）');
+  }
+  if (!form.origin || form.origin.trim() === '') {
+    return alert('请输入产地');
+  }
+  if (!form.length || form.length <= 0) {
+    return alert('请输入有效的长度（大于0）');
+  }
+  if (!form.width || form.width <= 0) {
+    return alert('请输入有效的宽度（大于0）');
+  }
+  if (!form.height || form.height <= 0) {
+    return alert('请输入有效的高度（大于0）');
+  }
   
   submitting.value = true;
   try {
@@ -218,19 +272,19 @@ onMounted(() => {
             <input type="text" v-model="form.productName" placeholder="例如: iPhone 15" />
           </div>
            <div class="form-group">
-            <label>SKU (编码)</label>
+            <label>SKU (编码) <span class="text-red">*</span></label>
             <input type="text" v-model="form.skuCode" placeholder="例如: SKU001" />
           </div>
           <div class="row">
               <div class="form-group half">
-                <label>分类</label>
+                <label>分类 <span class="text-red">*</span></label>
                 <select v-model="form.categoryId">
                     <option value="" disabled>选择分类</option>
                     <option v-for="c in categories" :key="c.categoryId" :value="c.categoryId">{{ c.categoryName }}</option>
                 </select>
               </div>
                <div class="form-group half">
-                <label>单位</label>
+                <label>单位 <span class="text-red">*</span></label>
                  <select v-model="form.unitId">
                     <option value="" disabled>选择单位</option>
                     <option v-for="u in units" :key="u.unitId" :value="u.unitId">{{ u.unitName }}</option>
@@ -238,12 +292,53 @@ onMounted(() => {
               </div>
           </div>
            <div class="form-group">
-            <label>规格型号</label>
+            <label>规格型号 <span class="text-red">*</span></label>
             <input type="text" v-model="form.spec" placeholder="例如: 红色 / 256GB" />
           </div>
-           <div class="form-group">
-            <label>产地</label>
-            <input type="text" v-model="form.origin" placeholder="例如: 中国" />
+
+          <div class="row">
+            <div class="form-group half">
+              <label>存储类型 <span class="text-red">*</span></label>
+              <select v-model="form.storageTypeId">
+                <option value="" disabled>选择存储类型</option>
+                <option v-for="t in storageTypes" :key="t.typeId" :value="t.typeId">{{ t.typeName }}</option>
+              </select>>
+            </div>
+            <div class="form-group half">
+              <label>货物标签 <span class="text-red">*</span></label>
+              <select v-model="form.labelId">
+                <option value="" disabled>选择标签</option>
+                <option v-for="l in productLabels" :key="l.labelId" :value="l.labelId">{{ l.labelName }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group half">
+              <label>重量 (kg) <span class="text-red">*</span></label>
+              <input type="number" step="0.01" v-model.number="form.weight" placeholder="0.00" />
+            </div>
+            <div class="form-group half">
+              <label>产地 <span class="text-red">*</span></label>
+              <input type="text" v-model="form.origin" placeholder="例如: 中国" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>尺寸 (cm) <span class="text-red">*</span></label>
+            <div class="row">
+              <div class="form-group" style="flex: 1; margin: 0;">
+                <input type="number" step="0.01" v-model.number="form.length" placeholder="长" />
+              </div>
+              <span style="align-self: center; color: var(--text-secondary);">×</span>
+              <div class="form-group" style="flex: 1; margin: 0;">
+                <input type="number" step="0.01" v-model.number="form.width" placeholder="宽" />
+              </div>
+              <span style="align-self: center; color: var(--text-secondary);">×</span>
+              <div class="form-group" style="flex: 1; margin: 0;">
+                <input type="number" step="0.01" v-model.number="form.height" placeholder="高" />
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">

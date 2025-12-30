@@ -29,8 +29,19 @@ const handleLogin = async () => {
     // 我们只需要跳转。
     
     if (res.code === 200) {
-       // 模拟保存一个标志位，用于路由守卫（虽然 Session 是主要的，但前端还是标记一下已登录状态比较好）
+       // Save user info to LocalStorage
        localStorage.setItem('isLoggedIn', 'true');
+       
+       const data = res.data;
+       if (data) {
+           localStorage.setItem('username', data.username || data.account || '用户');
+           localStorage.setItem('role', data.role || '普通用户');
+           localStorage.setItem('account', data.account || '');
+           if (data.roles) {
+               localStorage.setItem('roles', JSON.stringify(data.roles));
+           }
+       }
+       
        router.push('/');
     } else {
        errorMsg.value = res.message || '登录失败';

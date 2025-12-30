@@ -41,7 +41,8 @@ const warehouseItems = [
 ];
 
 const systemItems = [
-  { name: '系统管理', path: '/system', icon: Settings },
+  { name: '用户管理', path: '/system/user', icon: Users },
+  { name: '角色管理', path: '/system/role', icon: Settings },
 ];
 
 // 下拉菜单展开状态

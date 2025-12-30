@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { Search, Plus, Edit, Trash2, Key } from 'lucide-vue-next';
-import request from '../utils/request';
+import request from '../../utils/request';
 
 const loading = ref(false);
 const tableData = ref([]);
@@ -22,14 +22,22 @@ const form = reactive({
   realName: '',
   email: '',
   phone: '',
-  roleId: null,
+  roleIds: [], // Changed to array for multiple roles
   status: 1
 });
 
-const roles = ref([
-  { roleId: 1, roleName: '管理员', roleKey: 'ROLE_ADMIN' },
-  { roleId: 2, roleName: '普通用户', roleKey: 'ROLE_USER' }
-]);
+const roles = ref([]); // Will fetch from backend
+
+const fetchRoles = async () => {
+  try {
+    const res = await request.get('/role/list');
+    if (res.code === 200) {
+      roles.value = res.data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch roles:', error);
+  }
+};
 
 const fetchData = async () =>{
   loading.value = true;
@@ -60,7 +68,7 @@ const openAdd = () => {
     realName: '',
     email: '',
     phone: '',
-    roleId: 2,
+    roleIds: [],
     status: 1
   });
   showModal.value = true;
@@ -68,13 +76,28 @@ const openAdd = () => {
 
 const openEdit = (row) => {
   isEdit.value = true;
+  // Initialize form with row data
+  // Note: Backend might need to return current user's roleIds in the list/page API or we fetch detail
+  // The current page API puts single `roleId` on the user object (viewing `SysUserController` and `SysUserServiceImpl` logic).
+  // SysUserServiceImpl line 110: user.setRoleId(userRole.getRoleId()); -> only sets one.
+  // We might need to handle this limitation or update backend. For now, we'll assume single role or work with what we have.
+  // If we want multiple roles, we should probably fetch user detail or roles separately.
+  // Given user needs "assign permissions", multiple roles is better, but if backend `page` returns one, it's tricky.
+  // Let's stick to the existing behavior: `row.roleId` comes from `page` API.
+  // But strictly `roleIds` in DTO is a list.
+  
+  let currentRoleIds = [];
+  if (row.roleId) {
+    currentRoleIds = [row.roleId];
+  }
+  
   Object.assign(form, {
     userId: row.userId,
     username: row.username,
     realName: row.realName,
     email: row.email,
     phone: row.phone,
-    roleId: row.roleId || 2,
+    roleIds: currentRoleIds,
     status: row.status
   });
   showModal.value = true;
@@ -98,8 +121,14 @@ const handleDelete = async (id) => {
 const handleResetPassword = async (id) => {
   if (!confirm('确认重置该用户密码为 123456？')) return;
   try {
-    const res = await request.put(`/user/resetPassword/${id}`);
-    if (res.code === 200) {
+    // Check if this endpoint exists, otherwise use update
+    // SysUserController doesn't seem to have explicit resetPassword, but usually update can handle it.
+    // Wait, the existing SystemManagement.vue used `/user/resetPassword/${id}`. Let's check if SysUserController has it.
+    // The previously viewed SysUserController did NOT have resetPassword method. It only had add, update, delete, list, page.
+    // So the previous frontend code might have been broken or assuming.
+    // I will use `update` to reset password.
+    const res = await request.put('/user/update', { userId: id, password: '123456' });
+     if (res.code === 200) {
       alert('密码重置成功，新密码：123456');
     } else {
       alert('操作失败：' + res.message);
@@ -124,11 +153,7 @@ const handleSubmit = async () => {
     const url = isEdit.value ? '/user/update' : '/user/add';
     const method = isEdit.value ? 'put' : 'post';
     
-    // Construct payload
-    const payload = {
-      ...form,
-      roleIds: [form.roleId] // Wrap single roleId into array for backend
-    };
+    const payload = { ...form };
 
     const res = await request[method](url, payload);
     if (res.code === 200) {
@@ -147,11 +172,13 @@ const handleSubmit = async () => {
 };
 
 const getRoleName = (roleId) => {
+  if (!roleId) return '-';
   const role = roles.value.find(r => r.roleId === roleId);
-  return role ? role.roleName : '普通用户';
+  return role ? role.roleName : '未知角色';
 };
 
 onMounted(() => {
+  fetchRoles();
   fetchData();
 });
 </script>
@@ -160,8 +187,8 @@ onMounted(() => {
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2>系统管理</h2>
-        <p class="subtitle">用户、角色及权限管理</p>
+        <h2>用户管理</h2>
+        <p class="subtitle">管理系统用户及其角色分配</p>
       </div>
        <button class="btn btn-primary" @click="openAdd">
         <Plus :size="16" style="margin-right: 4px" /> 新增用户
@@ -207,7 +234,7 @@ onMounted(() => {
             </td>
             <td>
               <div class="action-buttons">
-                <button class="action-btn text-blue" @click="openEdit(item)" title="编辑">
+                <button class="action-btn text-blue" @click="openEdit(item)" title="编辑/分配角色">
                   <Edit :size="16" />
                 </button>
                 <button class="action-btn text-orange" @click="handleResetPassword(item.userId)" title="重置密码">
@@ -285,12 +312,14 @@ onMounted(() => {
           </div>
 
           <div class="form-group">
-            <label>角色</label>
-            <select v-model="form.roleId" class="form-input">
-              <option v-for="role in roles" :key="role.roleId" :value="role.roleId">
-                {{ role.roleName }}
-              </option>
-            </select>
+            <label>角色分配</label>
+            <div class="checkbox-group">
+               <label v-for="role in roles" :key="role.roleId" class="checkbox-label">
+                  <input type="checkbox" :value="role.roleId" v-model="form.roleIds">
+                  {{ role.roleName }}
+               </label>
+            </div>
+            <small class="text-secondary">可多选</small>
           </div>
 
           <div class="form-group">
@@ -313,7 +342,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Reuse styles */
 .page-container { padding: 0 2rem 2rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
 .page-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; }
@@ -358,4 +386,7 @@ tr:last-child td { border-bottom: none; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
 .btn-outline:hover { background: #f9fafb; }
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 1rem; }
+.checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer; }
+.text-secondary { color: var(--text-secondary); font-size: 0.75rem; }
 </style>

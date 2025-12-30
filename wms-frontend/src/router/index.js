@@ -113,9 +113,15 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/system',
-    name: 'SystemManagement',
-    component: SystemManagement,
+    path: '/system/user',
+    name: 'UserManagement',
+    component: () => import('../views/system/UserManagement.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/system/role',
+    name: 'RoleManagement',
+    component: () => import('../views/system/RoleManagement.vue'),
     meta: { requiresAuth: true }
   }
 ];

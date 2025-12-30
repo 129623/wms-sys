@@ -22,27 +22,44 @@ service.interceptors.request.use(
     }
 );
 
+import toast from './toast';
+
+// Response interceptor
 // Response interceptor
 service.interceptors.response.use(
     response => {
         const res = response.data;
 
-        // Adjust this check based on your actual backend response structure
-        // If the expected behavior is that the backend returns { code: 200, data: ... }
         if (res.code !== 200) {
-            console.error('Error:', res.message || 'Unknown Error');
-            return Promise.reject(new Error(res.message || 'Error'));
+            // Check for both msg and message, backend uses 'msg' in Result.java
+            const errorMessage = res.msg || res.message || '操作失败';
+
+            // Handle specific backend error messages usually associated with permissions
+            if (errorMessage === 'Access Denied') {
+                toast.error('权限不足，无法执行该操作');
+            } else {
+                toast.error(errorMessage);
+            }
+            return Promise.reject(new Error(errorMessage));
         } else {
             return res;
         }
     },
     error => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            localStorage.removeItem('isLoggedIn');
-            // Ideally redirect to login, simple window location change or use router if available
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
+        if (error.response) {
+            if (error.response.status === 401) {
+                localStorage.removeItem('isLoggedIn');
+                if (window.location.pathname !== '/login') {
+                    window.location.href = '/login';
+                }
+            } else if (error.response.status === 403) {
+                toast.error('权限不足，无法执行该操作');
+            } else {
+                const errMsg = error.response.data?.msg || error.response.data?.message || '服务器错误';
+                toast.error(errMsg);
             }
+        } else {
+            toast.error('网络连接异常');
         }
         console.log('err' + error); // for debug
         return Promise.reject(error);

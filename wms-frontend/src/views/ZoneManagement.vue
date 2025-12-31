@@ -113,6 +113,13 @@ onMounted(() => { fetchMeta(); fetchData(); });
        </table>
     </div>
     
+    <!-- Pagination -->
+    <div class="pagination">
+        <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum <= 1" @click="queryParams.pageNum--; fetchData()">上一页</button>
+        <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页 (总数: {{ total }})</span>
+        <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="queryParams.pageNum++; fetchData()">下一页</button>
+    </div>
+    
     <div v-if="showModal" class="modal-overlay" @click.self="showModal=false">
        <div class="modal">
           <div class="modal-header"><h3>{{ isEdit?'编辑':'新增' }}库区</h3></div>
@@ -180,4 +187,7 @@ th { background: #f9f9f9; font-weight: 600; color: #666; font-size: 0.9rem; }
 .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
 .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: 1rem; padding: 0 0.5rem; }
+.page-info { color: #666; font-size: 0.9rem; }
+.btn-sm { padding: 4px 12px; font-size: 0.85rem; }
 </style>

@@ -28,7 +28,7 @@ public class WmsInboundOrderController {
         if (orderNo != null && !orderNo.isEmpty()) {
             queryWrapper.like(WmsInboundOrder::getOrderNo, orderNo);
         }
-        queryWrapper.orderByDesc(WmsInboundOrder::getCreateTime);
+        queryWrapper.orderByAsc(WmsInboundOrder::getStatus).orderByDesc(WmsInboundOrder::getCreateTime);
         return Result.success(inboundOrderService.page(page, queryWrapper));
     }
 

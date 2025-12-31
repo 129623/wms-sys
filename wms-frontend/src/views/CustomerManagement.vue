@@ -228,6 +228,10 @@ onMounted(() => {
                 <input v-model="form.phone" type="text" class="form-input" />
              </div>
              <div class="form-group">
+                <label>邮箱</label>
+                <input v-model="form.email" type="email" class="form-input" placeholder="例如: contact@example.com" />
+             </div>
+             <div class="form-group">
                 <label>城市</label>
                 <input v-model="form.city" type="text" class="form-input" />
              </div>

@@ -129,7 +129,7 @@ onMounted(() => { fetchMeta(); fetchData(); });
     
     <div class="table-container">
        <table>
-         <thead><tr><th>仓库</th><th>库区</th><th>货架</th><th>库位编码</th><th>行</th><th>层</th><th>操作</th></tr></thead>
+         <thead><tr><th>仓库</th><th>库区</th><th>货架</th><th>库位编码</th><th>行</th><th>层</th><th>限重</th><th>限体积</th><th>操作</th></tr></thead>
          <tbody>
             <tr v-if="loading"><td colspan="7" class="text-center">加载中...</td></tr>
             <tr v-else v-for="item in tableData" :key="item.locationId">
@@ -139,12 +139,21 @@ onMounted(() => { fetchMeta(); fetchData(); });
                 <td class="font-medium">{{ item.locationCode }}</td>
                 <td>{{ item.rowNo }}</td>
                 <td>{{ item.layerNo }}</td>
+                <td>{{ item.maxWeight ? item.maxWeight + ' kg' : '-' }}</td>
+                <td>{{ item.maxVolume ? item.maxVolume + ' m³' : '-' }}</td>
                 <td>
                     <button class="action-btn text-red" @click="handleDelete(item.locationId)"><Trash2 :size="16"/></button>
                 </td>
             </tr>
          </tbody>
        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+        <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum <= 1" @click="queryParams.pageNum--; fetchData()">上一页</button>
+        <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页 (总数: {{ total }})</span>
+        <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="queryParams.pageNum++; fetchData()">下一页</button>
     </div>
 
     <!-- Add Modal -->
@@ -263,4 +272,7 @@ th { background: #f9f9f9; font-weight: 600; color: #666; font-size: 0.9rem; }
 .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: 1rem; padding: 0 0.5rem; }
+.page-info { color: #666; font-size: 0.9rem; }
+.btn-sm { padding: 4px 12px; font-size: 0.85rem; }
 </style>

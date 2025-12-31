@@ -18,9 +18,7 @@ const submitting = ref(false);
 const form = reactive({
   typeId: null,
   typeCode: '',
-  typeName: '',
-  description: '',
-  storageConditions: ''
+  typeName: ''
 });
 
 const fetchData = async () => {
@@ -48,9 +46,7 @@ const openAddModal = () => {
   Object.assign(form, {
     typeId: null,
     typeCode: '',
-    typeName: '',
-    description: '',
-    storageConditions: ''
+    typeName: ''
   });
   showModal.value = true;
 };
@@ -121,20 +117,18 @@ onMounted(() => {
           <tr>
             <th>类型编码</th>
             <th>类型名称</th>
-            <th>描述</th>
-            <th>存储条件</th>
+            <th>创建时间</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="5" class="text-center">加载中...</td>
+            <td colspan="4" class="text-center">加载中...</td>
           </tr>
           <tr v-else v-for="item in tableData" :key="item.typeId">
             <td class="font-medium">{{ item.typeCode }}</td>
             <td>{{ item.typeName }}</td>
-            <td>{{ item.description || '-' }}</td>
-            <td>{{ item.storageConditions || '-' }}</td>
+            <td>{{ item.createTime || '-' }}</td>
             <td>
               <div class="action-buttons">
                 <button class="action-btn text-blue" @click="openEditModal(item)"><Edit :size="16" /></button>
@@ -143,7 +137,7 @@ onMounted(() => {
             </td>
           </tr>
            <tr v-if="!loading && tableData.length === 0">
-            <td colspan="5" class="text-center">暂无数据</td>
+            <td colspan="4" class="text-center">暂无数据</td>
           </tr>
         </tbody>
       </table>
@@ -172,14 +166,6 @@ onMounted(() => {
           <div class="form-group">
             <label>类型名称 <span class="text-red">*</span></label>
             <input type="text" v-model="form.typeName" placeholder="例如: 常温存储" />
-          </div>
-          <div class="form-group">
-            <label>存储条件</label>
-            <input type="text" v-model="form.storageConditions" placeholder="例如: 温度: 15-25℃, 湿度: 40-60%" />
-          </div>
-          <div class="form-group">
-            <label>描述</label>
-            <textarea v-model="form.description" placeholder="描述该存储类型的特点和用途" rows="3"></textarea>
           </div>
         </div>
         <div class="modal-footer">

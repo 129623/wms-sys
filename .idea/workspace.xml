@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="297ce0ce-fa3c-4039-b1fa-08edd0dd97fe" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/wms/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/wms/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wms/src/main/java/com/wms/controller/WmsInboundOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/wms/src/main/java/com/wms/controller/WmsInboundOrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wms/src/main/java/com/wms/controller/WmsOutboundOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/wms/src/main/java/com/wms/controller/WmsOutboundOrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/CargoInfo.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/CargoInfo.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/CustomerManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/CustomerManagement.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/Dashboard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/Dashboard.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/StorageTypeManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/StorageTypeManagement.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -12,11 +18,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/wms" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="37WYqU28rYFrnI90nFtOWcnx1up" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -26,12 +32,22 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "项目",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ]
   }
 }]]></component>
   <component name="SharedIndexes">
@@ -50,6 +66,7 @@
       <option name="presentableId" value="Default" />
       <updated>1767020486194</updated>
       <workItem from="1767020488781" duration="101000" />
+      <workItem from="1767171203811" duration="5055000" />
     </task>
     <servers />
   </component>

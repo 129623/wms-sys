@@ -21,7 +21,7 @@ const productLabels = ref([]);
 // Mapping Helpers
 const getCategoryName = (id) => categories.value.find(c => c.categoryId === id)?.categoryName || '-';
 const getUnitName = (id) => units.value.find(u => u.unitId === id)?.unitName || '-';
-const getStorageTypeName = (id) => storageTypes.value.find(t => t.storageTypeId === id)?.typeName || '-';
+const getStorageTypeName = (id) => storageTypes.value.find(t => t.typeId === id)?.typeName || '-';
 const getLabelName = (id) => productLabels.value.find(l => l.labelId === id)?.labelName || '-';
 
 // Modal State
@@ -39,6 +39,8 @@ const form = reactive({
   length: 0,
   width: 0,
   height: 0,
+  palletCapacity: 0,
+  imageUrl: '',
   storageTypeId: '',
   labelId: '',
   origin: ''
@@ -99,6 +101,8 @@ const openAddModal = () => {
     length: 0,
     width: 0,
     height: 0,
+    palletCapacity: 0,
+    imageUrl: '',
     storageTypeId: '',
     labelId: '',
     origin: ''
@@ -338,6 +342,17 @@ onMounted(() => {
               <div class="form-group" style="flex: 1; margin: 0;">
                 <input type="number" step="0.01" v-model.number="form.height" placeholder="高" />
               </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group half">
+              <label>托盘容量 (个)</label>
+              <input type="number" v-model.number="form.palletCapacity" placeholder="单个托盘可容纳数量" />
+            </div>
+            <div class="form-group half">
+              <label>图片URL</label>
+              <input type="text" v-model="form.imageUrl" placeholder="产品图片链接" />
             </div>
           </div>
         </div>

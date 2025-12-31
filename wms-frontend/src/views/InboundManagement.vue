@@ -35,6 +35,11 @@ const handleSearch = () => {
   fetchData();
 };
 
+const handlePageChange = (newPage) => {
+  queryParams.pageNum = newPage;
+  fetchData();
+};
+
 const goToAdd = () => {
   router.push('/inbound/add');
 };
@@ -59,19 +64,11 @@ const handleDelete = async (id) => {
 };
 
 const getStatusClass = (status) => {
-  // Adjust based on your actual status values (e.g., 0, 1, 2)
-  if (status === 1 || status === 'Received') return 'badge-success';
-  return 'badge-info';
+  return status === 2 ? 'badge-success' : 'badge-info';
 };
 
 const formatStatus = (status) => {
-  // Map status codes to text if necessary
-  const map = {
-    0: '未入库',
-    1: '已入库',
-    2: '作废'
-  };
-  return map[status] || status;
+  return status === 2 ? '已入库' : '未入库';
 };
 
 onMounted(() => {
@@ -146,9 +143,12 @@ onMounted(() => {
       </table>
       
       <!-- Simple Pagination -->
+      <!-- Pagination -->
       <div class="pagination" v-if="total > 0">
-         <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
-         <!-- Implement full pagination if needed -->
+         <span class="page-info">共 {{ total }} 条</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum === 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
+         <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
       </div>
     </div>
   </div>
@@ -288,6 +288,11 @@ tr:last-child td {
   padding: 1rem;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
   border-top: 1px solid var(--border-color);
 }
+.page-info { color: var(--text-secondary); font-size: 0.875rem; }
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

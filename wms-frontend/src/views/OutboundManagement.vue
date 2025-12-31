@@ -66,18 +66,17 @@ const handleSearch = () => {
   fetchData();
 };
 
+const handlePageChange = (newPage) => {
+  queryParams.pageNum = newPage;
+  fetchData();
+};
+
 const getStatusClass = (status) => {
-  if (status === 1) return 'badge-success';
-  return 'badge-info';
+  return status === 2 ? 'badge-success' : 'badge-info';
 };
 
 const formatStatus = (status) => {
-  const map = {
-    0: '未出库',
-    1: '已出库',
-    2: '作废'
-  };
-  return map[status] || status;
+  return status === 2 ? '已出库' : '未出库';
 };
 
 onMounted(() => {
@@ -147,8 +146,11 @@ onMounted(() => {
         </tbody>
       </table>
        <div class="pagination" v-if="total > 0">
-         <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
-      </div>
+         <span class="page-info">共 {{ total }} 条</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum === 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
+         <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
+       </div>
     </div>
   </div>
 </template>
@@ -178,5 +180,15 @@ tr:last-child td { border-bottom: none; }
 .text-blue { color: #8b5cf6; }
 .text-red { color: #ef4444; }
 .text-center { text-align: center; }
-.pagination { padding: 1rem; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); }
+.pagination { 
+    padding: 1rem; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    gap: 1rem; 
+    border-top: 1px solid var(--border-color); 
+}
+.page-info { color: var(--text-secondary); font-size: 0.875rem; }
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

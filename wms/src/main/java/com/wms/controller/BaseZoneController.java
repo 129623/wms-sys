@@ -38,7 +38,7 @@ public class BaseZoneController {
         if (status != null) {
             queryWrapper.eq(BaseZone::getStatus, status);
         } else {
-            // 默认只显示未删除的库区（status != 0）
+            // 默认只显示未删除/启用的库区（status != 0）
             queryWrapper.ne(BaseZone::getStatus, 0);
         }
         // Usually list available zones or all? Logic delete implies we might want to

@@ -48,6 +48,9 @@ public class WmsInboundOrderServiceImpl extends ServiceImpl<WmsInboundOrderMappe
                 return true;
         }
 
+        @org.springframework.beans.factory.annotation.Autowired
+        private com.wms.service.LocationCapacityService locationCapacityService;
+
         @Override
         @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
         public boolean executeReceipt(com.wms.dto.WmsInboundReceiptDTO receiptDTO, String operator) {
@@ -69,6 +72,10 @@ public class WmsInboundOrderServiceImpl extends ServiceImpl<WmsInboundOrderMappe
                 if (detail.getReceivedQty() + receiptDTO.getQty() > detail.getPlanQty()) {
                         throw new RuntimeException("入库数量超出计划数量");
                 }
+
+                // CHECK CAPACITY BEFORE ADDING INVENTORY
+                locationCapacityService.checkCapacity(receiptDTO.getLocationId(), detail.getProductId(),
+                                receiptDTO.getQty());
 
                 // 2. Add to Inventory
                 com.wms.entity.WmsInventory inventory = new com.wms.entity.WmsInventory();

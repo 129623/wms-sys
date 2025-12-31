@@ -137,8 +137,10 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
-      <div class="pagination" v-if="total > 0">
-         <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
+      <div class="pagination">
+          <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum <= 1" @click="queryParams.pageNum--; fetchData()">上一页</button>
+          <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页 (总数: {{ total }})</span>
+          <button class="btn btn-outline btn-sm" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="queryParams.pageNum++; fetchData()">下一页</button>
       </div>
     </div>
     
@@ -217,4 +219,8 @@ tr:last-child td { border-bottom: none; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .btn-primary { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 .btn-outline { background: white; border: 1px solid #ddd; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+
+.pagination { align-items: center; gap: 1rem; }
+.pagination .page-info { color: var(--text-secondary); font-size: 0.875rem; }
+.btn-sm { padding: 4px 12px; font-size: 0.85rem; }
 </style>

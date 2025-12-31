@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wms.entity.WmsInboundOrder;
 import com.wms.entity.WmsOutboundOrder;
 import com.wms.entity.WmsInventory;
-import com.wms.entity.BaseProduct;
 import com.wms.mapper.WmsInboundOrderMapper;
 import com.wms.mapper.WmsOutboundOrderMapper;
 import com.wms.mapper.WmsInventoryMapper;
@@ -36,6 +35,12 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private BaseProductMapper productMapper;
+
+    @Autowired
+    private com.wms.mapper.BaseZoneMapper zoneMapper;
+
+    @Autowired
+    private com.wms.mapper.BaseLocationMapper locationMapper;
 
     @Override
     public Map<String, Object> getDashboardStats() {
@@ -105,59 +110,90 @@ public class DashboardServiceImpl implements DashboardService {
     public Map<String, Object> getInventoryInfo() {
         Map<String, Object> result = new HashMap<>();
 
-        // 获取库存充足的产品（前5个）
-        List<Map<String, Object>> topInventory = inventoryMapper.selectMaps(
+        // 获取库存充足的产品（前5个），关联产品名称
+        // 方法：直接查询inventory并在Java层关联product
+        List<WmsInventory> inventories = inventoryMapper.selectList(
                 new QueryWrapper<WmsInventory>()
+                        .eq("del_flag", "0")
                         .orderByDesc("total_qty")
                         .last("LIMIT 5"));
 
+        List<Map<String, Object>> topInventory = new ArrayList<>();
+        for (WmsInventory inv : inventories) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("inventoryId", inv.getInventoryId());
+            item.put("productId", inv.getProductId());
+            item.put("totalQty", inv.getTotalQty());
+            item.put("availableQty", inv.getAvailableQty());
+
+            // 查询产品信息
+            if (inv.getProductId() != null) {
+                com.wms.entity.BaseProduct product = productMapper.selectById(inv.getProductId());
+                if (product != null) {
+                    item.put("productName", product.getProductName());
+                    item.put("skuCode", product.getSkuCode());
+                } else {
+                    item.put("productName", "未知产品");
+                    item.put("skuCode", "");
+                }
+            } else {
+                item.put("productName", "未知产品");
+                item.put("skuCode", "");
+            }
+
+            topInventory.add(item);
+        }
+
         result.put("topInventory", topInventory);
 
-        // 真实库区容量统计（按体积）
+        // 库区容量统计（按库位数量 - 方案1）
         List<Map<String, Object>> zoneCapacity = new ArrayList<>();
 
-        // 查询所有库区及其库位容量统计
-        String sql = "SELECT " +
-                "z.zone_id, z.zone_name, " +
-                "COALESCE(SUM(l.max_volume), 0) as total_volume, " +
-                "COALESCE(SUM(CASE WHEN i.inventory_id IS NOT NULL THEN l.max_volume ELSE 0 END), 0) as used_volume " +
-                "FROM base_zone z " +
-                "LEFT JOIN base_location l ON z.zone_id = l.zone_id " +
-                "LEFT JOIN wms_inventory i ON l.location_id = i.location_id " +
-                "WHERE z.del_flag = '0' " +
-                "GROUP BY z.zone_id, z.zone_name " +
-                "ORDER BY z.zone_id " +
-                "LIMIT 5";
-
         try {
-            // 使用原生SQL查询
-            List<Map<String, Object>> zones = inventoryMapper.selectMaps(
-                    new QueryWrapper<WmsInventory>().apply(sql));
+            // 查询所有未删除的库区
+            List<com.wms.entity.BaseZone> zones = zoneMapper.selectList(
+                    new QueryWrapper<com.wms.entity.BaseZone>()
+                            .eq("del_flag", "0")
+                            .orderByAsc("zone_id"));
 
-            for (Map<String, Object> zone : zones) {
-                Map<String, Object> zoneData = new HashMap<>();
-                String zoneName = (String) zone.get("zone_name");
+            // 遍历各库区，统计库位使用情况
+            for (com.wms.entity.BaseZone zone : zones) {
+                // 统计该库区的总库位数
+                Long totalLocations = locationMapper.selectCount(
+                        new QueryWrapper<com.wms.entity.BaseLocation>()
+                                .eq("zone_id", zone.getZoneId())
+                                .eq("del_flag", "0"));
 
-                // 将体积转换为整数（四舍五入）
-                Double totalVolumeDouble = getDoubleValue(zone.get("total_volume"));
-                Double usedVolumeDouble = getDoubleValue(zone.get("used_volume"));
+                // 只统计有库位的库区
+                if (totalLocations > 0) {
+                    // 统计该库区已占用的库位数（有库存的库位）
+                    Long usedLocations = inventoryMapper.selectCount(
+                            new QueryWrapper<WmsInventory>()
+                                    .inSql("location_id",
+                                            "SELECT location_id FROM base_location WHERE zone_id = " + zone.getZoneId()
+                                                    + " AND del_flag = '0'")
+                                    .eq("del_flag", "0")
+                                    .gt("total_qty", 0));
 
-                Long totalVolume = Math.round(totalVolumeDouble);
-                Long usedVolume = Math.round(usedVolumeDouble);
+                    System.out.println(
+                            "Zone: " + zone.getZoneName() + ", Total: " + totalLocations + ", Used: " + usedLocations);
 
-                int percentage = totalVolume > 0 ? (int) ((usedVolume * 100) / totalVolume) : 0;
-
-                zoneData.put("zoneName", zoneName);
-                zoneData.put("current", usedVolume);
-                zoneData.put("total", totalVolume);
-                zoneData.put("percentage", percentage);
-
-                if (totalVolume > 0) { // 只显示有容量的库区
+                    Map<String, Object> zoneData = new HashMap<>();
+                    zoneData.put("zoneName", zone.getZoneName());
+                    zoneData.put("current", usedLocations);
+                    zoneData.put("total", totalLocations);
+                    int percentage = totalLocations > 0 ? (int) ((usedLocations * 100) / totalLocations) : 0;
+                    zoneData.put("percentage", percentage);
                     zoneCapacity.add(zoneData);
                 }
             }
+
+            System.out.println("Total zones with capacity: " + zoneCapacity.size());
+
         } catch (Exception e) {
-            // 如果查询失败，使用默认数据
+            // 如果查询失败，返回默认数据
+            System.err.println("Failed to calculate zone capacity: " + e.getMessage());
+            e.printStackTrace();
             Map<String, Object> defaultZone = new HashMap<>();
             defaultZone.put("zoneName", "暂无数据");
             defaultZone.put("current", 0);

@@ -60,21 +60,22 @@ const handleLogin = async () => {
 
 <template>
   <div class="login-container">
-    <!-- Decorative background elements -->
-    <div class="bg-decoration"></div>
+    <!-- Dynamic Background Image -->
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
     
     <div class="login-card">
       <div class="card-header">
         <div class="logo-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         </div>
-        <h2 class="title">WMS 智能仓储</h2>
-        <p class="subtitle">Efficient. Smart. Reliable.</p>
+        <h2 class="title">WMS 智能仓储管理</h2>
+        <p class="subtitle">让管理更简单 · 让运营更高效</p>
       </div>
       
       <div class="form-container">
         <div class="form-group">
-          <label>账号</label>
+          <label>用户账号</label>
           <div class="input-wrapper">
              <input 
               v-model="loginForm.username" 
@@ -86,7 +87,7 @@ const handleLogin = async () => {
         </div>
         
         <div class="form-group">
-          <label>密码</label>
+          <label>登录密码</label>
           <div class="input-wrapper">
             <input 
               v-model="loginForm.password" 
@@ -103,13 +104,13 @@ const handleLogin = async () => {
         </div>
         
         <button class="login-btn" :disabled="loading" @click="handleLogin">
-          <span>{{ loading ? '登录中...' : '登 录' }}</span>
+          <span>{{ loading ? '正在验证...' : '登 录 系 统' }}</span>
           <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </button>
       </div>
       
       <div class="footer">
-        <p>默认账号: admin / 123456</p>
+        <p>快速体验: admin / 123456</p>
       </div>
     </div>
   </div>
@@ -125,142 +126,139 @@ const handleLogin = async () => {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background-color: #0f172a;
   font-family: 'Inter', sans-serif;
   color: #fff;
+  background-color: #1e293b;
 }
 
-/* Background Gradients */
-.login-container::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(circle, rgba(132, 204, 22, 0.15) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 1;
-}
-
-.login-container::after {
-  content: '';
-  position: absolute;
-  bottom: -20%;
-  right: -10%;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 1;
-}
-
-.bg-decoration {
+/* Background Image with Animation */
+.bg-image {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  z-index: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/login-bg.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  animation: bgZoom 30s linear infinite alternate;
+}
+
+@keyframes bgZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); } /* Reduced scale for sharpness */
+}
+
+.bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Lightened the overlay significantly */
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.45) 100%);
+  z-index: 2;
 }
 
 .login-card {
   position: relative;
   z-index: 10;
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 3rem;
-  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.08); /* More transparent */
+  backdrop-filter: blur(12px); /* Reduced blur for clarity */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 3.5rem;
+  border-radius: 2rem;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+  animation: cardFadeIn 1s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .card-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .logo-icon {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #84cc16, #65a30d);
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  box-shadow: 0 10px 20px rgba(132, 204, 22, 0.3);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
 }
 
 .title {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.85rem;
+  font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(to right, #ffffff, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .subtitle {
-  color: #94a3b8;
-  font-size: 0.875rem;
-  letter-spacing: 0.025em;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #cbd5e1;
-  margin-bottom: 0.5rem;
-}
-
-.input-wrapper {
-  position: relative;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.6rem;
+  margin-left: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.875rem 1rem;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
-  color: white;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.85rem;
+  color: #fff;
   font-size: 1rem;
   outline: none;
-  transition: all 0.2s;
-  box-sizing: border-box; /* Important */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
 }
 
 .form-group input::placeholder {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .form-group input:focus {
-  border-color: #84cc16;
-  background: rgba(15, 23, 42, 0.8);
-  box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #38bdf8;
+  /* Cleaner focus without the heavy green shadow */
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
 }
 
 .error-msg {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fee2e2;
+  padding: 0.8rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
@@ -270,39 +268,44 @@ const handleLogin = async () => {
 
 .login-btn {
   width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #84cc16, #65a30d);
-  color: white;
+  padding: 1rem;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  color: #fff;
   border: none;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: 0.85rem;
+  font-weight: 700;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  gap: 0.6rem;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
 }
 
 .login-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(132, 204, 22, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .login-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  opacity: 0.6;
   filter: grayscale(0.5);
+  cursor: not-allowed;
 }
 
 .footer {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   text-align: center;
-  font-size: 0.75rem;
-  color: #64748b;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1.5rem;
 }
 </style>

@@ -1,19 +1,45 @@
 <script setup>
-import { ref } from 'vue';
-import { Search, Bell, Mail, User, LogOut, Settings, ChevronDown } from 'lucide-vue-next';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Search, Bell, User, LogOut, ChevronDown, AlertTriangle } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
+import request from '../utils/request';
 import { showToast } from '../utils/toast';
 
 const router = useRouter();
 const showUserMenu = ref(false);
+const showNotifications = ref(false);
 const searchQuery = ref('');
+const notifications = ref([]);
+const unreadCount = ref(0);
 
 // 获取用户信息（从localStorage）
 const username = localStorage.getItem('username') || '用户';
 const role = localStorage.getItem('role') || '用户';
 
+// 获取通知
+const fetchNotifications = async () => {
+  try {
+    const res = await request.get('/dashboard/notifications');
+    notifications.value = res.data || [];
+    unreadCount.value = notifications.value.length;
+  } catch (error) {
+    console.error('获取通知失败', error);
+  }
+};
+
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value;
+  if (showNotifications.value) {
+    fetchNotifications();
+    showUserMenu.value = false;
+  }
+};
+
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
+  if (showUserMenu.value) {
+    showNotifications.value = false;
+  }
 };
 
 const handleSearch = () => {
@@ -52,7 +78,19 @@ const handleLogout = () => {
 // 点击外部关闭菜单
 const closeMenu = () => {
   showUserMenu.value = false;
+  showNotifications.value = false;
 };
+
+// 定时刷新通知 (每分钟)
+let timer = null;
+onMounted(() => {
+  fetchNotifications();
+  timer = setInterval(fetchNotifications, 60000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
 </script>
 
 <template>
@@ -74,11 +112,33 @@ const closeMenu = () => {
         />
       </div>
 
-      <div class="icon-btn">
+      <div class="icon-btn notification-btn" @click.stop="toggleNotifications">
         <Bell :size="20" />
-      </div>
-      <div class="icon-btn">
-        <Mail :size="20" />
+        <span class="badge" v-if="unreadCount > 0">{{ unreadCount }}</span>
+        
+        <!-- 通知下拉框 -->
+        <div v-if="showNotifications" class="notification-dropdown" @click.stop>
+          <div class="dropdown-header">
+            <h3>系统通知</h3>
+            <span class="text-xs text-secondary">{{ unreadCount }} 条未读</span>
+          </div>
+          <div class="notification-list">
+             <div v-if="notifications.length === 0" class="empty-notif">
+                <Bell :size="24" class="text-gray-300 mb-2" />
+                <p>暂无新通知</p>
+             </div>
+             <div v-else class="notif-item" v-for="item in notifications" :key="item.id">
+                <div class="notif-icon warning">
+                   <AlertTriangle :size="16" />
+                </div>
+                <div class="notif-content">
+                   <h4 class="notif-title">{{ item.title }}</h4>
+                   <p class="notif-desc">{{ item.content }}</p>
+                   <span class="notif-time">{{ new Date(item.time).toLocaleString() }}</span>
+                </div>
+             </div>
+          </div>
+        </div>
       </div>
 
       <div class="user-profile" @click="toggleUserMenu">
@@ -112,7 +172,7 @@ const closeMenu = () => {
     </div>
 
     <!-- 遮罩层，点击关闭菜单 -->
-    <div v-if="showUserMenu" class="overlay" @click="closeMenu"></div>
+    <div v-if="showUserMenu || showNotifications" class="overlay" @click="closeMenu"></div>
   </header>
 </template>
 
@@ -320,7 +380,122 @@ const closeMenu = () => {
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 99;
+  z-index: 90;
   background: transparent;
+}
+
+/* 通知下拉框样式 */
+.notification-btn {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;
+  font-weight: 700;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 50px;
+  right: -80px;
+  width: 320px;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  z-index: 100;
+  border: 1px solid var(--border-color);
+  cursor: default;
+}
+
+.dropdown-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.empty-notif {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.notif-item {
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+}
+
+.notif-item:hover {
+  background: var(--bg-color);
+}
+
+.notif-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notif-icon.warning {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.notif-content {
+  flex: 1;
+}
+
+.notif-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.notif-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+}
+
+.notif-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
 }
 </style>

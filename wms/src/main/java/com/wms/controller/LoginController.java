@@ -76,6 +76,13 @@ public class LoginController {
             data.put("roles", roleNames);
             data.put("role", roleNames.isEmpty() ? "普通用户" : roleNames.get(0)); // Primary role for display
 
+            // Extract permissions from authentication
+            java.util.Set<String> permissions = new java.util.HashSet<>();
+            for (org.springframework.security.core.GrantedAuthority authority : authentication.getAuthorities()) {
+                permissions.add(authority.getAuthority());
+            }
+            data.put("permissions", permissions);
+
             return Result.success(data);
         } catch (org.springframework.security.core.AuthenticationException e) {
             return Result.error("登录失败: " + e.getMessage());

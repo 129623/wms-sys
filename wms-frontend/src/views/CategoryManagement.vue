@@ -4,7 +4,13 @@ import { Plus, Edit, Trash2, X, Save } from 'lucide-vue-next';
 import request from '../utils/request';
 
 const loading = ref(false);
-const tableData = ref([]);
+const allData = ref([]); // Store all data
+const tableData = ref([]); // Store current page data
+const total = ref(0);
+const queryParams = reactive({
+    pageNum: 1,
+    pageSize: 10
+});
 
 // Modal State
 const showModal = ref(false);
@@ -20,7 +26,9 @@ const fetchData = async () => {
   try {
     const res = await request.get('/category/list');
     if (res.code === 200) {
-      tableData.value = res.data;
+      allData.value = res.data;
+      total.value = res.data.length;
+      updateTableData();
     }
   } catch (error) {
     console.error('Failed to fetch categories:', error);
@@ -29,6 +37,21 @@ const fetchData = async () => {
   }
 };
 
+const updateTableData = () => {
+    const start = (queryParams.pageNum - 1) * queryParams.pageSize;
+    const end = start + queryParams.pageSize;
+    tableData.value = allData.value.slice(start, end);
+}
+
+const handleSearch = () => {
+  queryParams.pageNum = 1;
+  fetchData();
+};
+
+const handlePageChange = (newPage) => {
+  queryParams.pageNum = newPage;
+  fetchData();
+};
 const openAddModal = () => {
   isEdit.value = false;
   form.categoryId = null;
@@ -128,6 +151,13 @@ onMounted(() => {
       </table>
     </div>
 
+    <div class="pagination" v-if="total > 0">
+       <span class="page-info">共 {{ total }} 条</span>
+       <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum === 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
+       <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+       <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
+    </div>
+
     <!-- Modal -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
@@ -168,6 +198,18 @@ tr:last-child td { border-bottom: none; }
 .text-blue { color: #8b5cf6; }
 .text-red { color: #ef4444; }
 .text-center { text-align: center; }
+
+/* Pagination Styles */
+.pagination { 
+    padding: 1rem; 
+    border-top: 1px solid #e5e7eb; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    gap: 1rem; 
+}
+.page-info { color: #6b7280; font-size: 0.875rem; }
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
 
 /* Modal Styles */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }

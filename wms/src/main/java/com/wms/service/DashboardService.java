@@ -1,6 +1,7 @@
 package com.wms.service;
 
 import java.util.Map;
+import java.util.List;
 
 /**
  * 仪表盘服务接口
@@ -22,4 +23,9 @@ public interface DashboardService {
      * 获取最近操作动态
      */
     Map<String, Object> getRecentActivities();
+
+    /**
+     * 获取系统通知（如库存预警）
+     */
+    List<Map<String, Object>> getNotifications();
 }

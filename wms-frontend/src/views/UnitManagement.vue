@@ -89,10 +89,15 @@ const submitForm = async () => {
   }
 };
 
+const handleSearch = () => {
+  queryParams.pageNum = 1;
+  fetchData();
+};
+
 const handlePageChange = (newPage) => {
-    queryParams.pageNum = newPage;
-    fetchData();
-}
+  queryParams.pageNum = newPage;
+  fetchData();
+};
 
 onMounted(() => {
   fetchData();
@@ -142,13 +147,10 @@ onMounted(() => {
         </tbody>
       </table>
         <div class="pagination" v-if="total > 0">
-         <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
-         <!-- Simplistic pagination for now -->
-         <div class="pagination-controls" v-if="total > queryParams.pageSize">
-             <button :disabled="queryParams.pageNum <= 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
-             <span>{{ queryParams.pageNum }}</span>
-             <button :disabled="queryParams.pageNum * queryParams.pageSize >= total" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
-         </div>
+         <span class="page-info">共 {{ total }} 条</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum === 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
+         <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
       </div>
     </div>
 
@@ -207,6 +209,17 @@ tr:last-child td { border-bottom: none; }
 .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
 .modal-header h3 { margin: 0; font-size: 1.125rem; font-weight: 600; }
 .modal-body { padding: 1.5rem; }
+.mod.badge-gray { background: #f3f4f6; color: #1f2937; }
+.pagination { 
+    padding: 1rem; 
+    border-top: 1px solid #e5e7eb; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    gap: 1rem; 
+}
+.page-info { color: #6b7280; font-size: 0.875rem; }
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
 .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.5rem; }
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); }

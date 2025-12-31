@@ -55,12 +55,12 @@ const handleProductClick = (product) => {
 
 // 点击入库单卡片，跳转到入库单详情
 const handleInboundClick = (order) => {
-  router.push(`/inbound/detail/${order.orderId}`);
+  router.push(`/inbound/detail/${order.inboundId}`);
 };
 
 // 点击出库单卡片，跳转到出库单详情
 const handleOutboundClick = (order) => {
-  router.push(`/outbound/detail/${order.orderId}`);
+  router.push(`/outbound/detail/${order.outboundId}`);
 };
 
 onMounted(() => {

@@ -337,4 +337,68 @@ public class DashboardServiceImpl implements DashboardService {
         }
         return 0.0;
     }
+
+    @Override
+    public List<Map<String, Object>> getNotifications() {
+        List<Map<String, Object>> notifications = new ArrayList<>();
+
+        // 1. 库存预警 (聚合查询：按产品分组，计算所有仓库/批次的总可用量)
+        QueryWrapper<WmsInventory> invWrapper = new QueryWrapper<>();
+        invWrapper.select("product_id", "SUM(available_qty) as total_qty");
+        invWrapper.groupBy("product_id");
+        invWrapper.having("SUM(available_qty) < {0}", 10);
+        invWrapper.last("LIMIT 10");
+
+        // 使用 selectMaps 执行聚合查询
+        List<Map<String, Object>> lowStockList = inventoryMapper.selectMaps(invWrapper);
+
+        if (lowStockList != null && !lowStockList.isEmpty()) {
+            Set<Long> productIds = new HashSet<>();
+            for (Map<String, Object> map : lowStockList) {
+                // map的key通常与select中的别名一致，或者数据库字段名一致
+                Object pid = map.get("product_id");
+                if (pid != null) {
+                    productIds.add(Long.valueOf(pid.toString()));
+                }
+            }
+
+            // 批量查询产品名称
+            Map<Long, String> productNames = new HashMap<>();
+            if (!productIds.isEmpty()) {
+                productMapper.selectBatchIds(productIds).forEach(p -> {
+                    productNames.put(p.getProductId(), p.getProductName());
+                });
+            }
+
+            for (Map<String, Object> map : lowStockList) {
+                Long productId = Long.valueOf(map.get("product_id").toString());
+
+                // 处理 SUM 结果可能的数值类型 (Long, BigDecimal, Double 等)
+                Object totalQtyObj = map.get("total_qty");
+                long totalAvailable = 0;
+                if (totalQtyObj != null) {
+                    if (totalQtyObj instanceof Number) {
+                        totalAvailable = ((Number) totalQtyObj).longValue();
+                    } else {
+                        // 尝试字符串解析
+                        try {
+                            totalAvailable = Long.parseLong(totalQtyObj.toString().split("\\.")[0]);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+
+                Map<String, Object> notif = new HashMap<>();
+                notif.put("id", "stock-alert-" + productId);
+                notif.put("type", "warning");
+                notif.put("title", "总库存告急");
+                String name = productNames.getOrDefault(productId, "未知产品");
+                notif.put("content", "产品 [" + name + "] 全库总可用量仅剩 " + totalAvailable + " 件，请及时补货。");
+                notif.put("time", new Date());
+                notifications.add(notif);
+            }
+        }
+
+        return notifications;
+    }
 }

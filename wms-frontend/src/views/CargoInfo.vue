@@ -84,9 +84,11 @@ const handleSearch = () => {
 };
 
 const handlePageChange = (newPage) => {
-    queryParams.pageNum = newPage;
-    fetchData();
-}
+  queryParams.pageNum = newPage;
+  fetchData();
+};
+
+
 
 const openAddModal = () => {
   isEdit.value = false;
@@ -254,12 +256,10 @@ onMounted(() => {
         </tbody>
       </table>
        <div class="pagination" v-if="total > 0">
-         <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
-         <div class="pagination-controls" v-if="total > queryParams.pageSize">
-             <button :disabled="queryParams.pageNum <= 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
-             <span>{{ queryParams.pageNum }}</span>
-             <button :disabled="queryParams.pageNum * queryParams.pageSize >= total" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
-         </div>
+         <span class="page-info">共 {{ total }} 条</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum === 1" @click="handlePageChange(queryParams.pageNum - 1)">上一页</button>
+         <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+         <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="handlePageChange(queryParams.pageNum + 1)">下一页</button>
       </div>
     </div>
 
@@ -389,9 +389,18 @@ tr:last-child td { border-bottom: none; }
 .text-blue { color: #8b5cf6; }
 .text-red { color: #ef4444; }
 .text-center { text-align: center; }
-.pagination { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); }
-.pagination-controls button { padding: 0.25rem 0.75rem; border: 1px solid var(--border-color); background: white; border-radius: 0.25rem; cursor: pointer; margin: 0 0.25rem; }
-.pagination-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Pagination */
+.pagination { 
+    padding: 1rem; 
+    border-top: 1px solid #e5e7eb; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    gap: 1rem; 
+}
+.page-info { color: #6b7280; font-size: 0.875rem; }
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
 
 /* Modal Styles */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }

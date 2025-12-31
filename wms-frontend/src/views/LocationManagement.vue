@@ -13,10 +13,12 @@ const zones = ref([]);
 const racks = ref([]);
 const filteredZones = ref([]);
 const filteredRacks = ref([]);
+const batchFilteredZones = ref([]);
+const batchFilteredRacks = ref([]);
 
 const showModal = ref(false);
 const isEdit = ref(false);
-const showBatchModal = ref(false); // Batch Add Modal
+const showBatchModal = ref(false); 
 const submitting = ref(false);
 const form = reactive({
   locationId: null, warehouseId: null, zoneId: null, rackId: null,
@@ -63,8 +65,8 @@ const updateRacks = (zid, targetRef) => {
 watch(() => form.warehouseId, (val) => updateZones(val, filteredZones));
 watch(() => form.zoneId, (val) => updateRacks(val, filteredRacks));
 
-watch(() => batchForm.warehouseId, (val) => updateZones(val, filteredZones)); // Reuse same filtered list ok? No, careful. 
-// Ideally separate filtered lists or just dynamic. For simplicity, reusing logic but beware conflict if both modals open (impossible).
+watch(() => batchForm.warehouseId, (val) => updateZones(val, batchFilteredZones));
+watch(() => batchForm.zoneId, (val) => updateRacks(val, batchFilteredRacks));
 
 const openAdd = () => {
     isEdit.value = false;
@@ -78,6 +80,16 @@ const openAdd = () => {
 const openBatchAdd = () => {
     Object.assign(batchForm, { warehouseId: null, zoneId: null, rackId: null, rowStart: 1, rowEnd: 5, layerStart: 1, layerEnd: 3 });
     showBatchModal.value = true;
+}
+
+const openEdit = (row) => {
+    isEdit.value = true;
+    // 先手动触发级联列表更新，确保回显正常
+    updateZones(row.warehouseId, filteredZones);
+    updateRacks(row.zoneId, filteredRacks);
+    
+    Object.assign(form, row);
+    showModal.value = true;
 }
 
 const handleDelete = async (id) => {
@@ -122,8 +134,10 @@ onMounted(() => { fetchMeta(); fetchData(); });
     <div class="page-header">
       <div><h2>库位管理</h2><p class="subtitle">管理货架储位</p></div>
       <div class="header-actions">
-           <button class="btn btn-outline" @click="openBatchAdd" style="margin-right: 10px">批量生成</button>
-           <button class="btn btn-primary" @click="openAdd"><Plus :size="16" /> 新增库位</button>
+           <button class="btn btn-outline hover-effect" @click="openBatchAdd">
+              <span class="icon">⚡</span> 批量生成
+           </button>
+           <button class="btn btn-primary shadow-effect" @click="openAdd"><Plus :size="16" /> 新增库位</button>
       </div>
     </div>
     
@@ -142,6 +156,7 @@ onMounted(() => { fetchMeta(); fetchData(); });
                 <td>{{ item.maxWeight ? item.maxWeight + ' kg' : '-' }}</td>
                 <td>{{ item.maxVolume ? item.maxVolume + ' m³' : '-' }}</td>
                 <td>
+                    <button class="action-btn text-blue" @click="openEdit(item)"><Edit :size="16"/></button>
                     <button class="action-btn text-red" @click="handleDelete(item.locationId)"><Trash2 :size="16"/></button>
                 </td>
             </tr>
@@ -158,8 +173,8 @@ onMounted(() => { fetchMeta(); fetchData(); });
 
     <!-- Add Modal -->
     <div v-if="showModal" class="modal-overlay" @click.self="showModal=false">
-       <div class="modal">
-          <div class="modal-header"><h3>新增库位</h3></div>
+       <div class="modal slide-in">
+          <div class="modal-header"><h3>{{ isEdit ? '编辑库位' : '新增库位' }}</h3></div>
           <div class="modal-body">
              <div class="form-group">
                 <label>所属仓库</label>
@@ -209,7 +224,7 @@ onMounted(() => { fetchMeta(); fetchData(); });
     
     <!-- Batch Modal -->
      <div v-if="showBatchModal" class="modal-overlay" @click.self="showBatchModal=false">
-       <div class="modal">
+       <div class="modal slide-in">
           <div class="modal-header"><h3>批量生成库位</h3></div>
           <div class="modal-body">
               <div class="form-group">
@@ -221,15 +236,16 @@ onMounted(() => { fetchMeta(); fetchData(); });
              <div class="form-group">
                 <label>所属库区</label>
                 <select v-model="batchForm.zoneId" class="form-input" :disabled="!batchForm.warehouseId">
-                    <option v-for="z in filteredZones" :key="z.zoneId" :value="z.zoneId">{{ z.zoneName }}</option>
+                    <option v-for="z in batchFilteredZones" :key="z.zoneId" :value="z.zoneId">{{ z.zoneName }}</option>
                 </select>
              </div>
              <div class="form-group">
                 <label>所属货架</label>
                 <select v-model="batchForm.rackId" class="form-input" :disabled="!batchForm.zoneId">
-                    <option v-for="r in filteredRacks" :key="r.rackId" :value="r.rackId">{{ r.rackCode }}</option>
+                    <option v-for="r in batchFilteredRacks" :key="r.rackId" :value="r.rackId">{{ r.rackCode }}</option>
                 </select>
              </div>
+             <div class="divider"><span>范围设置</span></div>
              <div class="two-col">
                  <div class="form-group"><label>起始行</label><input v-model.number="batchForm.rowStart" type="number" class="form-input"/></div>
                  <div class="form-group"><label>结束行</label><input v-model.number="batchForm.rowEnd" type="number" class="form-input"/></div>
@@ -241,7 +257,7 @@ onMounted(() => { fetchMeta(); fetchData(); });
           </div>
           <div class="modal-footer">
              <button class="btn btn-outline" @click="showBatchModal=false">取消</button>
-             <button class="btn btn-primary" @click="handleBatchSubmit">生成</button>
+             <button class="btn btn-primary" @click="handleBatchSubmit">一键生成</button>
           </div>
        </div>
     </div>
@@ -252,27 +268,50 @@ onMounted(() => { fetchMeta(); fetchData(); });
 <style scoped>
 /* Reuse styles */
 .page-container { padding: 0 2rem 2rem; }
-.page-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
-.page-header h2 { margin: 0; font-size: 1.5rem; }
+.page-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; align-items: center; }
+.page-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #1f2937; }
 .subtitle { color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; }
-.table-container { background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+.header-actions { display: flex; gap: 12px; }
+
+.table-container { background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; }
-th { background: #f9f9f9; font-weight: 600; color: #666; font-size: 0.9rem; }
-.action-btn { background: none; border: none; cursor: pointer; padding: 4px; margin-right: 8px; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+th { background: #f9fafb; font-weight: 600; color: #4b5563; font-size: 0.875rem; }
+td { font-size: 0.875rem; color: #1f2937; }
+
+.action-btn { background: none; border: none; cursor: pointer; padding: 4px; margin-right: 8px; transition: transform 0.1s; }
+.action-btn:active { transform: scale(0.9); }
 .text-red { color: #ef4444; }
-.btn-primary { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-.btn-outline { background: white; border: 1px solid #ddd; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+.text-blue { color: #3b82f6; } 
+
+.btn-primary { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500; transition: all 0.2s; }
+.btn-primary:hover { background: #2563eb; }
+.shadow-effect { box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3); }
+
+.btn-outline { background: white; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; color: #374151; display: flex; align-items: center; gap: 6px; font-weight: 500; transition: all 0.2s; }
+.btn-outline:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+
 .text-center { text-align: center; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 50; }
-.modal { background: white; width: 450px; padding: 20px; border-radius: 8px; }
-.modal-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-.form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 50; backdrop-filter: blur(2px); }
+.modal { background: white; width: 480px; padding: 24px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+.modal.slide-in { animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-header { font-size: 1.25rem; font-weight: 600; margin-bottom: 24px; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: 0.875rem; font-weight: 500; color: #374151; }
+.form-input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; transition: border-color 0.2s; }
+.form-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.divider { display: flex; align-items: center; margin: 20px 0; color: #9ca3af; font-size: 0.75rem; }
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e5e7eb; }
+.divider span { padding: 0 10px; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
 .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: 1rem; padding: 0 0.5rem; }
-.page-info { color: #666; font-size: 0.9rem; }
-.btn-sm { padding: 4px 12px; font-size: 0.85rem; }
+.page-info { color: #6b7280; font-size: 0.875rem; }
+.btn-sm { padding: 6px 14px; font-size: 0.85rem; }
 </style>

@@ -66,11 +66,17 @@ public class BaseLocationServiceImpl extends ServiceImpl<BaseLocationMapper, Bas
                         throw new RuntimeException("指定的货架不存在，ID: " + batchAddDTO.getRackId());
                 }
 
-                Integer rowNum = batchAddDTO.getRowNum();
-                Integer layerNum = batchAddDTO.getLayerNum();
+                // Determine ranges
+                int rStart = batchAddDTO.getRowStart() != null ? batchAddDTO.getRowStart() : 1;
+                int rEnd = batchAddDTO.getRowEnd() != null ? batchAddDTO.getRowEnd()
+                                : (batchAddDTO.getRowNum() != null ? batchAddDTO.getRowNum() : 1);
 
-                for (int r = 1; r <= rowNum; r++) {
-                        for (int l = 1; l <= layerNum; l++) {
+                int lStart = batchAddDTO.getLayerStart() != null ? batchAddDTO.getLayerStart() : 1;
+                int lEnd = batchAddDTO.getLayerEnd() != null ? batchAddDTO.getLayerEnd()
+                                : (batchAddDTO.getLayerNum() != null ? batchAddDTO.getLayerNum() : 1);
+
+                for (int r = rStart; r <= rEnd; r++) {
+                        for (int l = lStart; l <= lEnd; l++) {
                                 BaseLocation location = new BaseLocation();
                                 // 核心修改：直接使用 Rack 中的 WarehouseId 和 ZoneId
                                 location.setWarehouseId(rack.getWarehouseId());

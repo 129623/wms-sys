@@ -253,6 +253,11 @@ onMounted(() => {
       </table>
       <div class="pagination" v-if="total > 0">
          <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
+         <div class="pagination-controls">
+            <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum <= 1" @click="() => { queryParams.pageNum--; fetchData(); }">上一页</button>
+            <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+            <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="() => { queryParams.pageNum++; fetchData(); }">下一页</button>
+         </div>
       </div>
     </div>
 
@@ -363,10 +368,11 @@ tr:last-child td { border-bottom: none; }
 .text-orange { color: #f97316; }
 .text-red { color: #ef4444; }
 .text-center { text-align: center; }
-.pagination { padding: 1rem; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); }
-.badge { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-.badge-success { background: #dcfce7; color: #16a34a; }
 .badge-danger { background: #fee2e2; color: #dc2626; }
+
+.pagination-controls { display: flex; align-items: center; gap: 1rem; }
+.pagination { padding: 1rem; display: flex; justify-content: flex-end; align-items: center; gap: 1rem; border-top: 1px solid var(--border-color); }
+.pagination .text-secondary { margin-right: auto; }
 
 /* Modal styles */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 50; }

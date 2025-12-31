@@ -50,4 +50,14 @@ public class DashboardController {
         Map<String, Object> activities = dashboardService.getRecentActivities();
         return Result.success(activities);
     }
+
+    /**
+     * 获取系统通知（库存预警等）
+     */
+    @GetMapping("/notifications")
+    @PreAuthorize("isAuthenticated()")
+    public Result<java.util.List<Map<String, Object>>> getNotifications() {
+        java.util.List<Map<String, Object>> notifications = dashboardService.getNotifications();
+        return Result.success(notifications);
+    }
 }

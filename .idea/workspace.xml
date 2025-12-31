@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="297ce0ce-fa3c-4039-b1fa-08edd0dd97fe" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/components/TopHeader.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/components/TopHeader.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/CargoInfo.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/CargoInfo.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/CategoryManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/CategoryManagement.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/CustomerManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/CustomerManagement.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/Dashboard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/Dashboard.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/ProductLabelManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/ProductLabelManagement.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/SearchResults.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/SearchResults.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/StorageTypeManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/StorageTypeManagement.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wms-frontend/src/views/UnitManagement.vue" beforeDir="false" afterPath="$PROJECT_DIR$/wms-frontend/src/views/UnitManagement.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +70,7 @@
       <option name="presentableId" value="Default" />
       <updated>1767020486194</updated>
       <workItem from="1767020488781" duration="101000" />
-      <workItem from="1767171203811" duration="5055000" />
+      <workItem from="1767171203811" duration="6898000" />
     </task>
     <servers />
   </component>

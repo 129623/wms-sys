@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { 
   LayoutDashboard, 
   ArrowDownToLine, 
@@ -10,43 +10,100 @@ import {
   Box, 
   Users,
   ChevronDown,
-  ChevronRight,
   Warehouse
 } from 'lucide-vue-next';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const userRoles = ref([]);
+const userPermissions = ref([]);
+const account = ref('');
+const username = ref('');
+
+onMounted(() => {
+  const rolesStr = localStorage.getItem('roles');
+  if (rolesStr) {
+    try {
+      userRoles.value = JSON.parse(rolesStr); 
+    } catch(e) { console.error(e); }
+  }
+  
+  const permsStr = localStorage.getItem('permissions');
+  if (permsStr) {
+      try {
+          userPermissions.value = JSON.parse(permsStr);
+      } catch(e) { console.error(e); }
+  }
+
+  username.value = localStorage.getItem('username') || '';
+  account.value = localStorage.getItem('account') || '';
+});
+
+const isAdmin = computed(() => {
+  // 1. Check account (login username)
+  if (account.value === 'admin') return true;
+  
+  // 2. Check permissions (backend adds ROLE_ADMIN to authorities)
+  if (userPermissions.value.includes('ROLE_ADMIN')) return true;
+
+  // 3. Check roles (backend might return Chinese name "超级管理员")
+  return userRoles.value.some(r => {
+    const val = typeof r === 'string' ? r : (r.roleKey || r.roleName || '');
+    return val === 'ROLE_ADMIN' || val === '超级管理员';
+  });
+});
+
+const hasPermission = (perm) => {
+    if (!perm) return true;
+    if (isAdmin.value) return true;
+    if (userPermissions.value.includes('*:*:*')) return true;
+    
+    // 1. Exact match
+    if (userPermissions.value.includes(perm)) return true;
+
+    // 2. Common convention: menu permission often ends with :list
+    if (userPermissions.value.includes(perm + ':list')) return true;
+
+    // 3. Prefix match: if user has 'wms:inbound:add', they should see 'wms:inbound' menu
+    // We append ':' to ensure we don't match 'wms:in' to 'wms:inventory'
+    return userPermissions.value.some(p => p.startsWith(perm + ':'));
+};
 
 const menuItems = [
-  { name: '仪表盘', path: '/', icon: LayoutDashboard },
-  { name: '入库管理', path: '/inbound', icon: ArrowDownToLine },
-  { name: '出库管理', path: '/outbound', icon: ArrowUpFromLine },
-  { name: '库存查询', path: '/inventory', icon: Search },
+  { name: '仪表盘', path: '/', icon: LayoutDashboard, permission: null }, // Dashboard always visible
+  { name: '入库管理', path: '/inbound', icon: ArrowDownToLine, permission: 'wms:inbound' }, 
+  { name: '出库管理', path: '/outbound', icon: ArrowUpFromLine, permission: 'wms:outbound' },
+  { name: '库存查询', path: '/inventory', icon: Search, permission: 'wms:inventory' }, // Assuming permission key
 ];
 
+// Note: Permission keys derived from RoleManagement.vue dependencies or common convention
 const basicDataItems = [
-  { name: '货物资料', path: '/cargo', icon: Box },
-  { name: '分类管理', path: '/category', icon: Database },
-  { name: '单位资料', path: '/unit', icon: Database },
-  { name: '存储类型', path: '/storage-type', icon: Database },
-  { name: '货物标签', path: '/product-label', icon: Database },
-  { name: '客户/供应商', path: '/customer', icon: Users },
+  { name: '货物资料', path: '/cargo', icon: Box, permission: 'base:goods:list' },
+  { name: '分类管理', path: '/category', icon: Database, permission: 'base:category:list' },
+  { name: '单位资料', path: '/unit', icon: Database, permission: 'base:unit:list' },
+  { name: '存储类型', path: '/storage-type', icon: Database, permission: 'base:storage:list' },
+  { name: '货物标签', path: '/product-label', icon: Database, permission: 'base:label:list' },
+  { name: '客户/供应商', path: '/customer', icon: Users, permission: 'base:customer:list' },
 ];
 
-// 仓储管理下拉项
 const warehouseItems = [
-  { name: '仓库管理', path: '/warehouse', icon: Database },
-  { name: '库区管理', path: '/zone', icon: Database },
-  { name: '货架管理', path: '/rack', icon: Database },
-  { name: '库位管理', path: '/location', icon: Database },
+  { name: '仓库管理', path: '/warehouse', icon: Database, permission: 'base:warehouse:list' },
+  { name: '库区管理', path: '/zone', icon: Database, permission: 'base:zone:list' },
+  { name: '货架管理', path: '/rack', icon: Database, permission: 'base:rack:list' },
+  { name: '库位管理', path: '/location', icon: Database, permission: 'base:location:list' },
 ];
 
 const systemItems = [
-  { name: '用户管理', path: '/system/user', icon: Users },
-  { name: '角色管理', path: '/system/role', icon: Settings },
+  { name: '用户管理', path: '/system/user', icon: Users, permission: 'system:user:list' },
+  { name: '角色管理', path: '/system/role', icon: Settings, permission: 'system:role:list' },
 ];
 
-// 下拉菜单展开状态
+// 权限过滤
+const filteredMenuItems = computed(() => menuItems.filter(item => !item.permission || hasPermission(item.permission)));
+const filteredBasicDataItems = computed(() => basicDataItems.filter(item => hasPermission(item.permission)));
+const filteredWarehouseItems = computed(() => warehouseItems.filter(item => hasPermission(item.permission)));
+const filteredSystemItems = computed(() => systemItems.filter(item => hasPermission(item.permission)));
+
 const warehouseExpanded = ref(true);
 
 const toggleWarehouse = () => {
@@ -55,9 +112,8 @@ const toggleWarehouse = () => {
 
 const isActive = (path) => route.path === path;
 
-// 检查仓储管理组是否有激活项
 const isWarehouseGroupActive = () => {
-  return warehouseItems.some(item => isActive(item.path));
+  return filteredWarehouseItems.value.some(item => isActive(item.path));
 };
 </script>
 
@@ -74,7 +130,7 @@ const isWarehouseGroupActive = () => {
       <div class="nav-section">
         <div class="nav-label">业务操作</div>
         <router-link 
-          v-for="item in menuItems" 
+          v-for="item in filteredMenuItems" 
           :key="item.path" 
           :to="item.path"
           class="nav-item"
@@ -88,7 +144,7 @@ const isWarehouseGroupActive = () => {
       <div class="nav-section">
         <div class="nav-label">基础资料</div>
         <router-link 
-          v-for="item in basicDataItems" 
+          v-for="item in filteredBasicDataItems" 
           :key="item.path" 
           :to="item.path"
           class="nav-item"
@@ -99,7 +155,7 @@ const isWarehouseGroupActive = () => {
         </router-link>
 
         <!-- 仓储管理下拉菜单 -->
-        <div class="nav-submenu">
+        <div class="nav-submenu" v-if="filteredWarehouseItems.length > 0">
           <div 
             class="nav-item nav-parent" 
             :class="{ active: isWarehouseGroupActive() }"
@@ -117,7 +173,7 @@ const isWarehouseGroupActive = () => {
           <transition name="slide">
             <div v-show="warehouseExpanded" class="submenu-items">
               <router-link 
-                v-for="item in warehouseItems" 
+                v-for="item in filteredWarehouseItems" 
                 :key="item.path" 
                 :to="item.path"
                 class="nav-item nav-subitem"
@@ -131,10 +187,10 @@ const isWarehouseGroupActive = () => {
         </div>
       </div>
 
-       <div class="nav-section">
+       <div class="nav-section" v-if="filteredSystemItems.length > 0">
         <div class="nav-label">系统管理</div>
         <router-link 
-          v-for="item in systemItems" 
+          v-for="item in filteredSystemItems" 
           :key="item.path" 
           :to="item.path"
           class="nav-item"

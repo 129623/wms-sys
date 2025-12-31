@@ -143,7 +143,8 @@ const goToTasks = () => {
                 查看库存
               </button>
               <button 
-                class="btn btn-outline bg-transparent text-white border-white hover:bg-white-10"
+                class="btn btn-outline"
+                style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.5);"
                 @click="router.push('/cargo')"
               >
                 货物管理

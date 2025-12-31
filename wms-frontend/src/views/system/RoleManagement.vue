@@ -136,19 +136,21 @@ const openEdit = async (row) => {
           const menu = menuList.value.find(m => m.menuId === id);
           if (!menu) return false;
           
-          // If this menu's permission is listed as a dependency
+          // 如果这个 menu 的 perms 在 dependencyMap 的 values 里（即它是被依赖的）
           if (menu.perms && dependencyValues.has(menu.perms)) {
-             // It is a dependency. Check if we have any of its children (buttons).
-             // If we have NO children selected, assume it's just a dependency and hide check.
-             // If we DO have children selected (e.g. 'base:warehouse:add'), then it was explicit.
+             // 它是某人的依赖项。我们需要区分它是"仅仅作为依赖被动选择"还是"用户显式选择"。
+             // 策略：
+             // 1. 如果它有子节点 (非叶子)，检查是否有子节点被选中。如果有，则保留（显式）。如果没有，则可能是隐式，过滤。
              const children = menuList.value.filter(m => m.parentId === menu.menuId);
              if (children.length > 0) {
                 const hasChild = children.some(child => allPerms.includes(child.menuId));
                 return hasChild;
              }
-             // If no children (it's a leaf dependency?), maybe keep it? 
-             // But usually dependencies are Module/Page readers.
-             return false; 
+             
+             // 2. 如果它是叶子节点 (没有子节点)，我们无法区分它是隐式还是显式。
+             // 为了避免"勾选了却不回显"的Bug，必须保留它。除非我们有更复杂的元数据记录"source"。
+             // 目前最安全的方式是保留所有叶子节点。
+             return true; 
           }
           return true;
       });
@@ -358,6 +360,11 @@ onMounted(() => {
       </table>
       <div class="pagination" v-if="total > 0">
          <span class="text-sm text-secondary">共 {{ total }} 条记录</span>
+         <div class="pagination-controls">
+            <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum <= 1" @click="() => { queryParams.pageNum--; fetchData(); }">上一页</button>
+            <span class="page-info">第 {{ queryParams.pageNum }} 页 / 共 {{ Math.ceil(total / queryParams.pageSize) }} 页</span>
+            <button class="btn btn-sm btn-outline" :disabled="queryParams.pageNum >= Math.ceil(total / queryParams.pageSize)" @click="() => { queryParams.pageNum++; fetchData(); }">下一页</button>
+         </div>
       </div>
     </div>
 
@@ -459,7 +466,10 @@ tr:last-child td { border-bottom: none; }
 .text-blue { color: #8b5cf6; }
 .text-red { color: #ef4444; }
 .text-center { text-align: center; }
-.pagination { padding: 1rem; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); }
+.badge-danger { background: #fee2e2; color: #dc2626; }
+
+.pagination-controls { display: flex; align-items: center; gap: 1rem; }
+.pagination { padding: 1rem; display: flex; justify-content: flex-end; align-items: center; gap: 1rem; border-top: 1px solid var(--border-color); }
 .badge { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
 .badge-success { background: #dcfce7; color: #16a34a; }
 .badge-danger { background: #fee2e2; color: #dc2626; }

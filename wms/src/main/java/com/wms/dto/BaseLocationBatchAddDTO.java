@@ -8,6 +8,14 @@ public class BaseLocationBatchAddDTO implements Serializable {
     private Long warehouseId;
     private Long zoneId;
     private Long rackId;
-    private Integer rowNum; // 总列数
-    private Integer layerNum; // 总层数
+
+    // Compatibility fields
+    private Integer rowNum;
+    private Integer layerNum;
+
+    // New range fields
+    private Integer rowStart;
+    private Integer rowEnd;
+    private Integer layerStart;
+    private Integer layerEnd;
 }

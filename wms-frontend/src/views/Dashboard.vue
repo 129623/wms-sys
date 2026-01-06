@@ -258,7 +258,7 @@ const goToTasks = () => {
                       :style="{ width: zone.percentage + '%' }"
                     ></div>
                   </div>
-                  <span class="muted">{{ zone.percentage }}% 已满</span>
+                  <span class="muted">{{ zone.percentage }}% 已使用</span>
                 </div>
               </div>
             </div>
@@ -715,77 +715,6 @@ const goToTasks = () => {
   color: var(--text-secondary);
 }
 
-/* Capacity Cards Scrollable Area */
-.capacity-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 350px; /* Fixed height for scrolling */
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
 
-/* Custom layout for scrollbar */
-.capacity-cards::-webkit-scrollbar {
-  width: 6px;
-}
-.capacity-cards::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-.capacity-cards::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 4px;
-}
-.capacity-cards::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
-}
-
-.cap-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.2s;
-  flex-shrink: 0; /* Prevent shrinking */
-}
-.cap-card:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-.cap-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-.cap-info h4 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  margin: 0;
-}
-.cap-info span {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-.progress-bar {
-  height: 0.5rem;
-  background: #f1f5f9;
-  border-radius: 9999px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-.progress {
-  height: 100%;
-  background: var(--success-color);
-  border-radius: 9999px;
-  transition: width 0.3s ease;
-}
-.progress.warning {
-  background: #f59e0b;
-}
-.cap-card .muted {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
 
 </style>

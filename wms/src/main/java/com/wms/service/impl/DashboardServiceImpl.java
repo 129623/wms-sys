@@ -166,14 +166,17 @@ public class DashboardServiceImpl implements DashboardService {
 
                 // 只统计有库位的库区
                 if (totalLocations > 0) {
-                    // 统计该库区已占用的库位数（有库存的库位）
-                    Long usedLocations = inventoryMapper.selectCount(
-                            new QueryWrapper<WmsInventory>()
-                                    .inSql("location_id",
-                                            "SELECT location_id FROM base_location WHERE zone_id = " + zone.getZoneId()
-                                                    + " AND del_flag = '0'")
-                                    .eq("del_flag", "0")
-                                    .gt("total_qty", 0));
+                    // 统计该库区已占用的库位数（有库存的库位，需去重）
+                    // 修正：使用 selectObjs 查询去重后的 location_id 数量
+                    QueryWrapper<WmsInventory> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.select("DISTINCT location_id");
+                    queryWrapper.inSql("location_id",
+                            "SELECT location_id FROM base_location WHERE zone_id = " + zone.getZoneId()
+                                    + " AND del_flag = '0'");
+                    queryWrapper.gt("total_qty", 0);
+
+                    List<Object> usedLocationIds = inventoryMapper.selectObjs(queryWrapper);
+                    Long usedLocations = (long) usedLocationIds.size();
 
                     System.out.println(
                             "Zone: " + zone.getZoneName() + ", Total: " + totalLocations + ", Used: " + usedLocations);

@@ -60,57 +60,53 @@ const handleLogin = async () => {
 
 <template>
   <div class="login-container">
-    <!-- Dynamic Background Image -->
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
-    
-    <div class="login-card">
-      <div class="card-header">
-        <div class="logo-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-        </div>
-        <h2 class="title">WMS 智能仓储管理</h2>
-        <p class="subtitle">让管理更简单 · 让运营更高效</p>
-      </div>
-      
-      <div class="form-container">
-        <div class="form-group">
-          <label>用户账号</label>
-          <div class="input-wrapper">
-             <input 
-              v-model="loginForm.username" 
-              type="text" 
-              placeholder="请输入用户名" 
-              @keyup.enter="handleLogin"
-            />
+    <div class="login-wrapper">
+      <div class="login-card">
+        <div class="card-header">
+          <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
           </div>
+          <h2 class="title">WMS 智能仓储</h2>
+          <p class="subtitle">让管理更简单 · 让运营更高效</p>
         </div>
         
-        <div class="form-group">
-          <label>登录密码</label>
-          <div class="input-wrapper">
-            <input 
-              v-model="loginForm.password" 
-              type="password" 
-              placeholder="请输入密码" 
-              @keyup.enter="handleLogin"
-            />
+        <div class="form-container">
+          <div class="form-group">
+            <label>用户账号</label>
+            <div class="input-wrapper">
+               <input 
+                v-model="loginForm.username" 
+                type="text" 
+                placeholder="请输入用户名" 
+                @keyup.enter="handleLogin"
+              />
+            </div>
           </div>
+          
+          <div class="form-group">
+            <label>登录密码</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="loginForm.password" 
+                type="password" 
+                placeholder="请输入密码" 
+                @keyup.enter="handleLogin"
+              />
+            </div>
+          </div>
+          
+          <div v-if="errorMsg" class="error-msg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            {{ errorMsg }}
+          </div>
+          
+          <button class="login-btn" :disabled="loading" @click="handleLogin">
+            <span>{{ loading ? '正在验证...' : '登 录 系 统' }}</span>
+            <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
         </div>
         
-        <div v-if="errorMsg" class="error-msg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          {{ errorMsg }}
-        </div>
-        
-        <button class="login-btn" :disabled="loading" @click="handleLogin">
-          <span>{{ loading ? '正在验证...' : '登 录 系 统' }}</span>
-          <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </button>
-      </div>
-      
-      <div class="footer">
-        <p>快速体验: admin / 123456</p>
+
       </div>
     </div>
   </div>
@@ -127,138 +123,113 @@ const handleLogin = async () => {
   position: relative;
   overflow: hidden;
   font-family: 'Inter', sans-serif;
-  color: #fff;
-  background-color: #1e293b;
+  color: var(--text-main);
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(132, 204, 22, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(101, 163, 13, 0.1) 0px, transparent 50%);
 }
 
-/* Background Image with Animation */
-.bg-image {
-  position: absolute;
-  top: 0;
-  left: 0;
+.login-wrapper {
+  position: relative;
   width: 100%;
-  height: 100%;
-  background-image: url('/assets/login-bg.png');
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
-  animation: bgZoom 30s linear infinite alternate;
-}
-
-@keyframes bgZoom {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.05); } /* Reduced scale for sharpness */
-}
-
-.bg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* Lightened the overlay significantly */
-  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.45) 100%);
-  z-index: 2;
+  max-width: 420px;
+  padding: 1rem;
 }
 
 .login-card {
   position: relative;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.08); /* More transparent */
-  backdrop-filter: blur(12px); /* Reduced blur for clarity */
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 3.5rem;
-  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--white);
+  padding: 3rem 2.5rem;
+  border-radius: 1.5rem;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
-  animation: cardFadeIn 1s ease-out;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.05),
+    0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  animation: cardFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes cardFadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .card-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .logo-icon {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #38bdf8, #2563eb);
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
-  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(132, 204, 22, 0.2);
 }
 
 .title {
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: var(--text-main);
+  letter-spacing: -0.025em;
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .form-group {
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #fff;
-  margin-bottom: 0.6rem;
-  margin-left: 0.2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
 }
 
 .form-group input {
   width: 100%;
-  padding: 1rem 1.25rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.85rem;
-  color: #fff;
-  font-size: 1rem;
+  padding: 0.875rem 1rem;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  color: var(--text-main);
+  font-size: 0.95rem;
   outline: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #9ca3af;
 }
 
 .form-group input:focus {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #38bdf8;
-  /* Cleaner focus without the heavy green shadow */
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.15);
 }
 
 .error-msg {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fee2e2;
-  padding: 0.8rem;
-  border-radius: 0.75rem;
-  font-size: 0.9rem;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
@@ -268,26 +239,26 @@ const handleLogin = async () => {
 
 .login-btn {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  padding: 0.875rem;
+  background: var(--primary-color);
   color: #fff;
   border: none;
-  border-radius: 0.85rem;
-  font-weight: 700;
-  font-size: 1.05rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(132, 204, 22, 0.3);
 }
 
 .login-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
-  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(132, 204, 22, 0.4);
 }
 
 .login-btn:active:not(:disabled) {
@@ -295,17 +266,9 @@ const handleLogin = async () => {
 }
 
 .login-btn:disabled {
-  opacity: 0.6;
-  filter: grayscale(0.5);
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
-.footer {
-  margin-top: 2.5rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1.5rem;
-}
+
 </style>

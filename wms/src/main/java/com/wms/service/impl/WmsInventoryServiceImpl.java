@@ -24,6 +24,13 @@ public class WmsInventoryServiceImpl extends ServiceImpl<WmsInventoryMapper, Wms
     private com.wms.service.BaseLocationService locationService;
 
     @Override
+    public com.baomidou.mybatisplus.core.metadata.IPage<com.wms.vo.WmsInventoryVO> pageVO(
+            com.baomidou.mybatisplus.core.metadata.IPage<WmsInventory> page,
+            com.baomidou.mybatisplus.core.conditions.Wrapper<WmsInventory> queryWrapper) {
+        return this.baseMapper.selectInventoryPage(page, queryWrapper);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void addInventory(WmsInventory inventory, String orderNo, String operator) {
         // 自动补充 ZoneId

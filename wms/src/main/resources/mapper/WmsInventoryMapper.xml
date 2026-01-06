@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wms.mapper.WmsInventoryMapper">
+
+    <select id="selectInventoryPage" resultType="com.wms.vo.WmsInventoryVO">
+        SELECT
+            i.*,
+            p.product_name,
+            p.sku_code,
+            p.spec AS product_spec,
+            w.warehouse_name,
+            l.location_code
+        FROM wms_inventory i
+        LEFT JOIN base_product p ON i.product_id = p.product_id
+        LEFT JOIN base_warehouse w ON i.warehouse_id = w.warehouse_id
+        LEFT JOIN base_location l ON i.location_id = l.location_id
+        <if test="ew.emptyOfWhere == false">
+            ${ew.customSqlSegment}
+        </if>
+        ORDER BY i.create_time DESC
+    </select>
+
+</mapper>

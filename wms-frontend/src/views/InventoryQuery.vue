@@ -64,8 +64,11 @@ const handlePageChange = (newPage) => {
 const openDetail = (item) => {
   currentItem.value = {
     ...item,
-    productName: getProductName(item.productId),
-    warehouseName: getWarehouseName(item.warehouseId)
+    ...item,
+    // Backend VOs now provide these names, but we keep fallback just in case or for older data
+    productName: item.productName || getProductName(item.productId),
+    warehouseName: item.warehouseName || getWarehouseName(item.warehouseId),
+    locationCode: item.locationCode || '-'
   };
   showModal.value = true;
 };
@@ -97,6 +100,7 @@ onMounted(() => {
         <thead>
           <tr>
             <th>货品</th>
+            <th>库位</th>
             <th>仓库</th>
             <th>批次号</th>
             <th>总数量</th>
@@ -110,8 +114,9 @@ onMounted(() => {
             <td colspan="7" class="text-center">加载中...</td>
           </tr>
           <tr v-else v-for="item in tableData" :key="item.inventoryId">
-            <td class="font-medium">{{ getProductName(item.productId) }}</td>
-            <td>{{ getWarehouseName(item.warehouseId) }}</td>
+            <td class="font-medium">{{ item.productName || getProductName(item.productId) }}</td>
+            <td>{{ item.locationCode || '-' }}</td>
+            <td>{{ item.warehouseName || getWarehouseName(item.warehouseId) }}</td>
             <td>{{ item.batchNo }}</td>
             <td class="font-bold">{{ item.totalQty }}</td>
             <td class="text-secondary">{{ item.frozenQty }}</td>
@@ -153,6 +158,10 @@ onMounted(() => {
             <div class="info-item">
               <label>仓库</label>
               <span>{{ currentItem.warehouseName }}</span>
+            </div>
+             <div class="info-item">
+              <label>库位</label>
+              <span>{{ currentItem.locationCode }}</span>
             </div>
             <div class="info-item">
               <label>批次号</label>

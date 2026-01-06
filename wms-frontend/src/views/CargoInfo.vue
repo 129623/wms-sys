@@ -137,9 +137,9 @@ const submitForm = async () => {
   if (!form.productName || form.productName.trim() === '') {
     return alert('请输入产品名称');
   }
-  if (!form.skuCode || form.skuCode.trim() === '') {
-    return alert('请输入SKU编码');
-  }
+  // if (!form.skuCode || form.skuCode.trim() === '') {
+  //   return alert('请输入SKU编码');
+  // }
   if (!form.categoryId) {
     return alert('请选择分类');
   }
@@ -276,8 +276,8 @@ onMounted(() => {
             <input type="text" v-model="form.productName" placeholder="例如: iPhone 15" />
           </div>
            <div class="form-group">
-            <label>SKU (编码) <span class="text-red">*</span></label>
-            <input type="text" v-model="form.skuCode" placeholder="例如: SKU001" />
+            <label>SKU (编码)</label>
+            <input type="text" v-model="form.skuCode" placeholder="留空自动生成" />
           </div>
           <div class="row">
               <div class="form-group half">

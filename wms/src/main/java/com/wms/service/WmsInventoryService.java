@@ -1,9 +1,14 @@
 package com.wms.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wms.entity.WmsInventory;
+import com.wms.vo.WmsInventoryVO;
 
 public interface WmsInventoryService extends IService<WmsInventory> {
+
+    IPage<WmsInventoryVO> pageVO(IPage<WmsInventory> page, Wrapper<WmsInventory> queryWrapper);
 
     /**
      * 入库增加库存

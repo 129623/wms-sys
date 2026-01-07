@@ -35,7 +35,7 @@ public class DashboardController {
      * 获取最新库存信息
      */
     @GetMapping("/inventory")
-    @PreAuthorize("hasAuthority('wms:inventory:list' or hasAuthority('ROLE_ADMIN'))")
+    @PreAuthorize("hasAuthority('wms:inventory:list') or hasAuthority('ROLE_ADMIN')")
     public Result<Map<String, Object>> getInventoryInfo() {
         Map<String, Object> inventory = dashboardService.getInventoryInfo();
         return Result.success(inventory);

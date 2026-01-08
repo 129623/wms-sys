@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/zone")
+@RequestMapping("/api/zone")
 public class BaseZoneController {
 
     @Autowired

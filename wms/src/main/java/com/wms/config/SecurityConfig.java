@@ -29,16 +29,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // 禁用 CSRF (通常用于 API 服务)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/unauth", "/error").permitAll() // 开放接口
+                        .requestMatchers("/api/login", "/api/unauth", "/error").permitAll() // 开放接口
                         // 允许所有已认证用户访问基础数据和业务接口
-                        .requestMatchers("/product/**", "/category/**", "/unit/**",
-                                "/customer/**", "/warehouse/**", "/zone/**",
-                                "/rack/**", "/location/**",
-                                "/inbound/**", "/outbound/**", "/inventory/**",
-                                "/upload/**")
+                        .requestMatchers("/api/product/**", "/api/category/**", "/api/unit/**",
+                                "/api/customer/**", "/api/warehouse/**", "/api/zone/**",
+                                "/api/rack/**", "/api/location/**",
+                                "/api/inbound/**", "/api/outbound/**", "/api/inventory/**",
+                                "/api/upload/**", "/api/dashboard/**", "/api/base/**",
+                                "/api/storage-type/**", "/api/product-label/**")
                         .authenticated()
                         // 系统管理需要特定权限
-                        .requestMatchers("/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                        .requestMatchers("/api/user/**", "/api/role/**", "/api/menu/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                         .anyRequest().authenticated() // 其他接口需认证
                 )
                 .exceptionHandling(exceptions -> exceptions
@@ -56,8 +57,8 @@ public class SecurityConfig {
                         }))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/unauth") // 退出后跳转
+                        .logoutUrl("/api/logout")
+                        .logoutSuccessUrl("/api/unauth") // 退出后跳转
                 );
 
         return http.build();

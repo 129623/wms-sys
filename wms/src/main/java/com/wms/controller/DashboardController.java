@@ -14,7 +14,7 @@ import java.util.Map;
  * 仪表盘控制器
  */
 @RestController
-@RequestMapping("/dashboard")
+@RequestMapping("/api/dashboard")
 public class DashboardController {
 
     @Autowired

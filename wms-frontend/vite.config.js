@@ -9,7 +9,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8088',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/wms-system'),
+        rewrite: (path) => path.replace(/^\/api/, '/wms-system/api'),
         configure: (proxy, options) => {
           proxy.on('proxyRes', (proxyRes, req, res) => {
             const cookies = proxyRes.headers['set-cookie'];
@@ -21,11 +21,7 @@ export default defineConfig({
             }
           });
         }
-      },
-      // Proxy everything else that looks like an API call if needed, but explicit /api is better.
-      // However, my previous request.js calls endpoints directly like /inbound/page, so I should probably proxy those.
-      // Let's just proxy based on the root context if possible, or I need to update request.js to prepend /api.
-      // Updating request.js is cleaner.
+      }
     }
   }
 })

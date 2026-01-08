@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/rack")
+@RequestMapping("/api/rack")
 public class BaseRackController {
 
     @Autowired

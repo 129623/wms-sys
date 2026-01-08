@@ -22,7 +22,7 @@ public class LoginController {
 
     private final org.springframework.security.web.context.SecurityContextRepository securityContextRepository = new org.springframework.security.web.context.HttpSessionSecurityContextRepository();
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public Result<java.util.Map<String, Object>> login(@RequestBody com.wms.dto.LoginDTO loginDTO,
             jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
         try {
@@ -89,13 +89,13 @@ public class LoginController {
         }
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/api/logout")
     public Result<String> logout() {
         org.springframework.security.core.context.SecurityContextHolder.clearContext();
         return Result.success("退出成功");
     }
 
-    @GetMapping("/unauth")
+    @GetMapping("/api/unauth")
     public Result<String> unauth() {
         return Result.error("未登录或无权限");
     }
